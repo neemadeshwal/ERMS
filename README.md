@@ -47,8 +47,8 @@ npm start
 
 ## Default Login
 
-**Manager**: manager@erms.com / manager123
-**Engineer**: engineer@erms.com / engineer123
+**Manager**: manager@erms.com / Manager@123
+**Engineer**: engineer@erms.com / Engineer@123
 
 ## Key Features
 
