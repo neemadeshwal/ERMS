@@ -33,9 +33,9 @@ const router = createBrowserRouter([
   {
     path: "/engineer",
     element: (
-      // <ProtectedRoute allowedRoles={["engineer"]}>
-      <EngineerSidebar />
-      // </ProtectedRoute>
+      <ProtectedRoute allowedRoles={["engineer"]}>
+        <EngineerSidebar />
+      </ProtectedRoute>
     ),
     children: [
       {
@@ -63,9 +63,9 @@ const router = createBrowserRouter([
   {
     path: "/manager",
     element: (
-      // <ProtectedRoute allowedRoles={["manager"]}>
-      <ManagerSidebar />
-      // </ProtectedRoute>
+      <ProtectedRoute allowedRoles={["manager"]}>
+        <ManagerSidebar />
+      </ProtectedRoute>
     ),
     children: [
       {

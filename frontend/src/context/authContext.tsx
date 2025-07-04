@@ -12,7 +12,7 @@ interface AuthContextType {
   token: string | null;
   role: string | null;
   isAuthenticated: boolean;
-  login: (token: string, role: string) => void; // Accept role
+  login: (token: string, role: string) => void;
   logout: () => void;
   user: User | null;
   refreshUser: () => Promise<void>;
@@ -52,22 +52,27 @@ export const AuthProvider = (props: AuthProviderProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [role, setRole] = useState<string | null>(null); // Add role state
+  const [role, setRole] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+
   const refreshUser = async () => {
     if (token) {
       setIsLoading(true);
       try {
-        const data = await getUser(token); // Pass token if needed
+        const data = await getUser(token);
         if (data && data.success && data.user) {
           setUser(data.user);
           setRole(data.user.role);
+          // Update role cookie in case it changed
+          setCookie("userRole", data.user.role);
         } else {
-          setUser(null);
-          setRole(null);
+          // Token is invalid, clear everything
+          logout();
         }
       } catch (err) {
-        setUser(null);
-        setRole(null);
+        console.error("Error refreshing user:", err);
+        // Token is invalid, clear everything
+        logout();
       } finally {
         setIsLoading(false);
       }
@@ -77,26 +82,38 @@ export const AuthProvider = (props: AuthProviderProps) => {
       setIsLoading(false);
     }
   };
+
+  // Initialize auth state from cookies on app start
   useEffect(() => {
     const storedToken = getCookie("authToken");
     const storedRole = getCookie("userRole");
-    if (storedToken) {
+
+    if (storedToken && storedRole) {
       setToken(storedToken);
-    }
-    if (storedRole) {
       setRole(storedRole);
+    } else {
+      // Clear any partial auth state
+      setToken(null);
+      setRole(null);
+      setUser(null);
+      setIsLoading(false);
     }
+    setIsInitialized(true);
   }, []);
+
+  // Refresh user data when token changes and after initialization
   useEffect(() => {
-    refreshUser();
+    if (isInitialized) {
+      refreshUser();
+    }
     // eslint-disable-next-line
-  }, [token]);
+  }, [token, isInitialized]);
+
   const login = (newToken: string, userRole: string) => {
     setToken(newToken);
     setRole(userRole);
-    setCookie("userRole", userRole);
-
-    setCookie("authToken", newToken);
+    setCookie("authToken", newToken, 7); // Set for 7 days
+    setCookie("userRole", userRole, 7); // Set for 7 days
   };
 
   const logout = () => {
