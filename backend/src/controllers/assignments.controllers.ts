@@ -1,20 +1,21 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { asyncErrorHandler } from "../middleware/error.middleware";
 import ErrorHandler from "../utils/errorHandler";
 import { Assignment } from "../models/assignment/assignment.model";
 import { User } from "../models/auth/user.model";
 import { Project } from "../models/project/project.model";
 
-function validateAssignment(body: any) {
+// Validation helper
+function validateAssignment(body: any): string[] {
   const errors: string[] = [];
   if (!body.engineerId) errors.push("Engineer is required");
   if (!body.projectId) errors.push("Project is required");
   if (
-    typeof body.allocationPercentage !== "number" ||
-    body.allocationPercentage < 1 ||
-    body.allocationPercentage > 100
+    typeof body.allocation !== "number" ||
+    body.allocation < 1 ||
+    body.allocation > 100
   )
-    errors.push("Allocation percentage must be between 1 and 100");
+    errors.push("Allocation must be between 1 and 100");
   if (!body.role || body.role.length < 2) errors.push("Role is required");
   if (!body.startDate) errors.push("Start date is required");
   if (!body.endDate) errors.push("End date is required");
@@ -27,9 +28,19 @@ function validateAssignment(body: any) {
   return errors;
 }
 
-// CREATE Assignment
+// CREATE Assignment Controller
 export const createAssignment = asyncErrorHandler(
   async (req: Request, res: Response, next: NextFunction) => {
+    // Map 'allocation' to 'allocationPercentage' if present
+    if (req.body.allocation && !req.body.allocationPercentage) {
+      req.body.allocationPercentage = req.body.allocation;
+    }
+
+    // Ensure allocationPercentage is a number
+    if (typeof req.body.allocationPercentage === "string") {
+      req.body.allocationPercentage = Number(req.body.allocationPercentage);
+    }
+
     const errors = validateAssignment(req.body);
     if (errors.length) {
       return next(new ErrorHandler(errors.join(", "), 400));
@@ -43,7 +54,7 @@ export const createAssignment = asyncErrorHandler(
       engineerIds = [req.body.engineerId];
     }
 
-    // Find the first engineer (for capacity update, if needed)
+    // Find the first engineer (for capacity update)
     const engineer = await User.findById(engineerIds[0]);
     if (!engineer) {
       return next(new ErrorHandler("Engineer not found.", 404));

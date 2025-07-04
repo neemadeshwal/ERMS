@@ -9,14 +9,19 @@ export async function createAssignment(
   assignmentData: NewAssignmentBody,
   token: string
 ) {
-  console.log(assignmentData, "assignmentData");
+  const data = {
+    ...assignmentData,
+    allocation: Number(assignmentData.allocation),
+  };
+
+  console.log(data);
   const response = await fetch(`${baseURL}/assignments`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(assignmentData),
+    body: JSON.stringify(data),
   });
   if (!response.ok) throw new Error("Failed to create assignment");
   return response.json();
