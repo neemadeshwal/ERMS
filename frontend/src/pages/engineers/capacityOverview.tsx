@@ -18,7 +18,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/context/authContext";
 import { getSingleAssignment } from "@/actions/assignments/assignment-action";
 
-// You may want to fetch this from your backend as well
 const RECOMMENDED_CAPACITY = 90;
 
 const EngineerCapacity = () => {
@@ -28,13 +27,11 @@ const EngineerCapacity = () => {
   const [timeRange, setTimeRange] = useState("current");
   const [showDetailed, setShowDetailed] = useState(false);
 
-  // Fetch assignments for this engineer
   useEffect(() => {
     const fetchAssignments = async () => {
       if (!user || !token) return;
       setLoading(true);
       try {
-        // Replace with your real API call
         const res = await getSingleAssignment(user._id, token);
         setAssignments(res.assignments || []);
       } catch (e) {
@@ -49,9 +46,9 @@ const EngineerCapacity = () => {
   // Calculate stats
   const today = new Date();
   const maxCapacity = Number(user?.maxCapacity) || 100;
-  const currentAllocation = Number(user?.currentCapacity) || 0;
-  const hoursPerWeek = Number(user?.hoursPerWeek) || 40; // You may want to store this in user profile
-  const efficiency = Number(user?.efficiency) || 92; // You may want to store this in user profile
+  const currentAllocation = Math.min(100, Number(user?.currentCapacity) || 0);
+  const hoursPerWeek = Number(user?.hoursPerWeek) || 40;
+  const efficiency = Number(user?.efficiency) || 92;
 
   // Active assignments: status is "active" and startDate <= today
   const activeAssignments = useMemo(
@@ -83,24 +80,28 @@ const EngineerCapacity = () => {
   );
 
   // Total allocation for active
-  const totalActiveAllocation = activeAssignments.reduce(
-    (sum, a) => sum + (a.allocationPercentage || 0),
-    0
+  const totalActiveAllocation = Math.min(
+    100,
+    activeAssignments.reduce((sum, a) => sum + (a.allocationPercentage || 0), 0)
   );
 
   // Total allocation for upcoming
-  const totalUpcomingAllocation = upcomingAssignments.reduce(
-    (sum, a) => sum + (a.allocationPercentage || 0),
-    0
+  const totalUpcomingAllocation = Math.min(
+    100,
+    upcomingAssignments.reduce(
+      (sum, a) => sum + (a.allocationPercentage || 0),
+      0
+    )
   );
 
   // Projected allocation
-  const projectedAllocation = currentAllocation + totalUpcomingAllocation;
+  const projectedAllocation = Math.min(
+    100,
+    currentAllocation + totalUpcomingAllocation
+  );
 
   // Available capacity
   const availableCapacity = Math.max(0, maxCapacity - currentAllocation);
-
-  // Overtime (dummy, or fetch from backend if available)
 
   // Capacity status
   const getCapacityStatus = () => {
@@ -117,27 +118,27 @@ const EngineerCapacity = () => {
   const capacityStatus = getCapacityStatus();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 px-2 sm:px-4 md:px-8 py-2 max-w-7xl mx-auto">
       {/* Header Section */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             Capacity Analysis
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-600 mt-1 text-sm sm:text-base">
             Monitor workload distribution and availability
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-[20px] font-medium transition-colors flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 sm:px-4 py-2 rounded-[20px] font-medium transition-colors flex items-center gap-2 text-xs sm:text-sm">
             <Filter className="w-4 h-4" />
             Filter
           </button>
-          <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-[20px] font-medium transition-colors flex items-center gap-2">
+          <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 sm:px-4 py-2 rounded-[20px] font-medium transition-colors flex items-center gap-2 text-xs sm:text-sm">
             <Download className="w-4 h-4" />
             Export
           </button>
-          <button className="bg-[#515caa] hover:bg-[#454a94] text-white px-6 py-3 rounded-[20px] font-medium transition-colors flex items-center gap-2">
+          <button className="bg-[#515caa] hover:bg-[#454a94] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-[20px] font-medium transition-colors flex items-center gap-2 text-xs sm:text-sm">
             <Settings className="w-5 h-5" />
             Optimize
           </button>
@@ -205,67 +206,67 @@ const EngineerCapacity = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-[20px] shadow-sm border border-gray-200">
+      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+        <div className="bg-white p-4 sm:p-6 rounded-[20px] shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Available Capacity</p>
-              <p className="text-2xl font-bold text-green-700">
+              <p className="text-xl sm:text-2xl font-bold text-green-700">
                 {availableCapacity}%
               </p>
               <p className="text-xs text-gray-500 mt-1">
                 {((availableCapacity * hoursPerWeek) / 100).toFixed(1)} hrs/week
               </p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-              <CheckCircle2 className="w-6 h-6 text-green-600" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-full flex items-center justify-center">
+              <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-[20px] shadow-sm border border-gray-200">
+        <div className="bg-white p-4 sm:p-6 rounded-[20px] shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Current Allocation</p>
-              <p className="text-2xl font-bold text-blue-700">
+              <p className="text-xl sm:text-2xl font-bold text-blue-700">
                 {currentAllocation}%
               </p>
               <p className="text-xs text-gray-500 mt-1">
                 {((currentAllocation * hoursPerWeek) / 100).toFixed(1)} hrs/week
               </p>
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <Clock className="w-6 h-6 text-blue-600" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center">
+              <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-[20px] shadow-sm border border-gray-200">
+        <div className="bg-white p-4 sm:p-6 rounded-[20px] shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Efficiency Score</p>
-              <p className="text-2xl font-bold text-purple-700">
+              <p className="text-xl sm:text-2xl font-bold text-purple-700">
                 {efficiency}%
               </p>
               <p className="text-xs text-gray-500 mt-1">Above average</p>
             </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-              <Target className="w-6 h-6 text-purple-600" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-full flex items-center justify-center">
+              <Target className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-[20px] shadow-sm border border-gray-200">
+        <div className="bg-white p-4 sm:p-6 rounded-[20px] shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Projected Load</p>
-              <p className="text-2xl font-bold text-orange-700">
-                {Math.min(projectedAllocation, 100)}%
+              <p className="text-xl sm:text-2xl font-bold text-orange-700">
+                {projectedAllocation}%
               </p>
               <p className="text-xs text-gray-500 mt-1">With upcoming</p>
             </div>
-            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-orange-600" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-full flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
             </div>
           </div>
         </div>
@@ -273,14 +274,14 @@ const EngineerCapacity = () => {
 
       {/* Capacity Visualization */}
       <div className="bg-white rounded-[20px] shadow-sm border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">
+        <div className="p-4 sm:p-6 border-b border-gray-200">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900">
               Capacity Overview
             </h2>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <select
-                className="text-sm border border-gray-300 rounded-[20px] px-3 py-2"
+                className="text-sm border border-gray-300 rounded-[20px] px-2 sm:px-3 py-2"
                 value={timeRange}
                 onChange={(e) => setTimeRange(e.target.value)}
               >
@@ -298,20 +299,20 @@ const EngineerCapacity = () => {
           </div>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <div className="space-y-6">
             {/* Main Capacity Bar */}
             <div>
-              <div className="flex justify-between text-sm text-gray-600 mb-3">
+              <div className="flex justify-between text-xs sm:text-sm text-gray-600 mb-3">
                 <span>Overall Capacity Utilization</span>
                 <span>
                   {currentAllocation}% of {maxCapacity}%
                 </span>
               </div>
               <div className="relative">
-                <div className="w-full bg-gray-200 rounded-full h-6">
+                <div className="w-full bg-gray-200 rounded-full h-4 sm:h-6">
                   <div
-                    className="bg-gradient-to-r from-[#515caa] to-blue-500 h-6 rounded-full transition-all duration-500 relative"
+                    className="bg-gradient-to-r from-[#515caa] to-blue-500 h-4 sm:h-6 rounded-full transition-all duration-500 relative"
                     style={{ width: `${currentAllocation}%` }}
                   >
                     <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white text-xs font-medium">
@@ -321,10 +322,10 @@ const EngineerCapacity = () => {
                 </div>
                 {/* Recommended capacity marker */}
                 <div
-                  className="absolute top-0 h-6 w-0.5 bg-yellow-500"
+                  className="absolute top-0 h-4 sm:h-6 w-0.5 bg-yellow-500"
                   style={{ left: `${RECOMMENDED_CAPACITY}%` }}
                 >
-                  <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-yellow-600 font-medium">
+                  <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs text-yellow-600 font-medium">
                     Recommended
                   </div>
                 </div>
@@ -340,7 +341,7 @@ const EngineerCapacity = () => {
                 {activeAssignments.map((assignment, index) => (
                   <div
                     key={assignment._id || assignment.id}
-                    className="flex items-center justify-between p-3 bg-white rounded-[20px]"
+                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-white rounded-[20px] gap-2"
                   >
                     <div className="flex items-center gap-3">
                       <div
@@ -356,7 +357,7 @@ const EngineerCapacity = () => {
                         <span className="text-sm font-medium text-gray-900">
                           {assignment.project?.name}
                         </span>
-                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
                           <span>{assignment.role}</span>
                           <span>
                             {assignment.hoursPerWeek
@@ -378,8 +379,8 @@ const EngineerCapacity = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-24 bg-gray-200 rounded-full h-2">
+                    <div className="flex items-center gap-3 mt-2 sm:mt-0">
+                      <div className="w-20 sm:w-24 bg-gray-200 rounded-full h-2">
                         <div
                           className={`h-2 rounded-full transition-all duration-300 ${
                             index === 0
@@ -389,12 +390,15 @@ const EngineerCapacity = () => {
                               : "bg-purple-500"
                           }`}
                           style={{
-                            width: `${assignment.allocationPercentage}%`,
+                            width: `${Math.min(
+                              100,
+                              assignment.allocationPercentage
+                            )}%`,
                           }}
                         ></div>
                       </div>
                       <span className="text-sm font-medium text-gray-900 w-8">
-                        {assignment.allocationPercentage}%
+                        {Math.min(100, assignment.allocationPercentage)}%
                       </span>
                     </div>
                   </div>
@@ -403,7 +407,7 @@ const EngineerCapacity = () => {
             </div>
 
             {showDetailed && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {/* Weekly Hours Breakdown */}
                 <div className="bg-gray-50 p-4 rounded-[20px]">
                   <h3 className="font-medium text-gray-900 mb-3">
@@ -452,8 +456,7 @@ const EngineerCapacity = () => {
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                       <span className="text-sm text-gray-600">
-                        Projected next month:{" "}
-                        {Math.min(projectedAllocation, 100)}%
+                        Projected next month: {projectedAllocation}%
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -472,32 +475,32 @@ const EngineerCapacity = () => {
 
       {/* Upcoming Projects Impact */}
       <div className="bg-white rounded-[20px] shadow-sm border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900">
+        <div className="p-4 sm:p-6 border-b border-gray-200">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900">
             Upcoming Projects Impact
           </h2>
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-600 mt-1 text-sm sm:text-base">
             How future assignments will affect your capacity
           </p>
         </div>
 
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="p-4 sm:p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {upcomingAssignments.map((assignment) => (
               <div
                 key={assignment._id || assignment.id}
-                className="bg-gradient-to-r from-orange-50 to-red-50 rounded-[20px] p-6 border border-orange-100"
+                className="bg-gradient-to-r from-orange-50 to-red-50 rounded-[20px] p-4 sm:p-6 border border-orange-100"
               >
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 gap-2">
                   <div className="flex-1">
-                    <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                    <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
                       {assignment.project?.name}
                     </h4>
-                    <p className="text-gray-600 mb-3">
+                    <p className="text-gray-600 mb-3 text-sm">
                       {assignment.project?.description}
                     </p>
 
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-500">
                       <div className="flex items-center gap-2">
                         <User className="w-4 h-4" />
                         <span>{assignment.role}</span>
@@ -513,38 +516,41 @@ const EngineerCapacity = () => {
                     </div>
                   </div>
 
-                  <div className="text-center">
-                    <div className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm font-medium mb-2">
+                  <div className="text-center mt-2 md:mt-0">
+                    <div className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs sm:text-sm font-medium mb-2">
                       {assignment.daysUntilStart} days
                     </div>
-                    <div className="text-2xl font-bold text-orange-600">
-                      {assignment.allocationPercentage}%
+                    <div className="text-xl sm:text-2xl font-bold text-orange-600">
+                      {Math.min(100, assignment.allocationPercentage)}%
                     </div>
                   </div>
                 </div>
 
                 <div className="mb-4">
-                  <div className="flex justify-between text-sm text-gray-600 mb-2">
+                  <div className="flex justify-between text-xs sm:text-sm text-gray-600 mb-2">
                     <span>Impact on Capacity</span>
                     <span className="font-medium">
-                      +{assignment.allocationPercentage}%
+                      +{Math.min(100, assignment.allocationPercentage)}%
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
                     <div
-                      className="bg-gradient-to-r from-orange-400 to-red-400 h-2 rounded-full transition-all duration-300"
+                      className="bg-gradient-to-r from-orange-400 to-red-400 h-1.5 sm:h-2 rounded-full transition-all duration-300"
                       style={{
-                        width: `${assignment.allocationPercentage}%`,
+                        width: `${Math.min(
+                          100,
+                          assignment.allocationPercentage
+                        )}%`,
                       }}
                     ></div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 pt-4 border-t border-orange-200">
-                  <button className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-[20px] text-sm font-medium transition-colors">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-4 border-t border-orange-200">
+                  <button className="bg-orange-600 hover:bg-orange-700 text-white px-3 sm:px-4 py-2 rounded-[20px] text-xs sm:text-sm font-medium transition-colors">
                     View Details
                   </button>
-                  <button className="bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-[20px] text-sm font-medium transition-colors border border-gray-300">
+                  <button className="bg-white hover:bg-gray-50 text-gray-700 px-3 sm:px-4 py-2 rounded-[20px] text-xs sm:text-sm font-medium transition-colors border border-gray-300">
                     Negotiate Terms
                   </button>
                 </div>

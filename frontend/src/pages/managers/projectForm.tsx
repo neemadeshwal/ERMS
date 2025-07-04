@@ -161,7 +161,7 @@ export default function ProjectForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 max-w-xl mx-auto overflow-auto max-h-[90%]"
+        className="space-y-8 max-w-[1400px] overflow-auto max-h-[70%] md:max-h-[80%] lg:max-h-[80%] z-[-10]"
       >
         {/* Project Name */}
         <FormField
@@ -254,7 +254,7 @@ export default function ProjectForm({
             </FormItem>
           )}
         />
-        <div className="flex gap-6">
+        <div className="flex flex-col md:flex-row gap-6">
           {/* Team Size */}
           <FormField
             control={form.control}

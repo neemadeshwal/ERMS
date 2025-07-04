@@ -205,25 +205,25 @@ const ManagerDashboard = () => {
     : [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-2 sm:p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
-        <div className="relative overflow-hidden bg-gradient-to-r from-[#4b5c9a] via-[#5c66a7] to-[#7d89c4] rounded-3xl p-8 text-white mb-8 shadow-2xl">
+        <div className="relative overflow-hidden bg-gradient-to-r from-[#4b5c9a] via-[#5c66a7] to-[#7d89c4] rounded-3xl p-4 sm:p-8 text-white mb-4 sm:mb-8 shadow-2xl">
           {/* Animated background elements */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32 animate-pulse"></div>
-          <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/10 rounded-full translate-y-20 -translate-x-20 animate-pulse delay-1000"></div>
-          <div className="absolute top-1/2 right-1/4 w-20 h-20 bg-white/5 rounded-full animate-bounce delay-500"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 sm:w-64 sm:h-64 bg-white/5 rounded-full -translate-y-16 sm:-translate-y-32 translate-x-16 sm:translate-x-32 animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 w-20 h-20 sm:w-40 sm:h-40 bg-white/10 rounded-full translate-y-10 sm:translate-y-20 -translate-x-10 sm:-translate-x-20 animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 right-1/4 w-10 h-10 sm:w-20 sm:h-20 bg-white/5 rounded-full animate-bounce delay-500"></div>
           <div className="relative z-10">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col md:flex-row items-start xl:items-center justify-between mb-4 sm:mb-8 gap-4">
               <div>
-                <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+                <h1 className="text-2xl sm:text-4xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
                   Engineering Command Center
                 </h1>
-                <p className="text-blue-100 text-lg">
+                <p className="text-blue-100 text-base sm:text-lg">
                   Orchestrate your team's success with precision
                 </p>
               </div>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
                 {/* Project Dialog */}
                 <Dialog
                   open={projectDialogOpen}
@@ -231,7 +231,7 @@ const ManagerDashboard = () => {
                 >
                   <DialogTrigger asChild>
                     <button
-                      className="group rounded-[5px] bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-3 font-medium transition-all duration-300 border border-white/30 flex items-center gap-2 hover:scale-105 transform"
+                      className="group rounded-[5px] bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-3 font-medium transition-all duration-300 border border-white/30 flex items-center gap-2 hover:scale-105 transform w-full sm:w-auto"
                       onClick={() => setProjectDialogOpen(true)}
                       type="button"
                     >
@@ -242,7 +242,7 @@ const ManagerDashboard = () => {
                       New Project
                     </button>
                   </DialogTrigger>
-                  <DialogContent className="bg-white rounded-[15px] w-[80vw] min:w-[80vw] h-[90%]">
+                  <DialogContent className="bg-white rounded-[15px] w-full max-w-lg sm:max-w-2xl h-auto max-h-[90vh]">
                     <DialogHeader>
                       <DialogTitle></DialogTitle>
                       <DialogDescription className="w-full">
@@ -258,7 +258,7 @@ const ManagerDashboard = () => {
                 >
                   <DialogTrigger asChild>
                     <button
-                      className="group rounded-[5px] bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-3 font-medium transition-all duration-300 border border-white/30 flex items-center gap-2 hover:scale-105 transform"
+                      className="group rounded-[5px] bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-3 font-medium transition-all duration-300 border border-white/30 flex items-center gap-2 hover:scale-105 transform w-full sm:w-auto"
                       onClick={() => setAssignmentDialogOpen(true)}
                       type="button"
                     >
@@ -269,7 +269,7 @@ const ManagerDashboard = () => {
                       New Assignment
                     </button>
                   </DialogTrigger>
-                  <DialogContent className="bg-white rounded-[15px] w-[80vw] min:w-[80vw] h-[90%]">
+                  <DialogContent className="bg-white rounded-[15px] w-full max-w-lg sm:max-w-2xl h-auto max-h-[90vh]">
                     <DialogHeader>
                       <DialogTitle></DialogTitle>
                       <DialogDescription className="w-full">
@@ -281,71 +281,79 @@ const ManagerDashboard = () => {
               </div>
             </div>
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="group bg-white/15 hover:bg-white/20 backdrop-blur-sm rounded-2xl p-6 border border-white/20 transition-all duration-300 hover:scale-105 cursor-pointer">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
+              <div className="group bg-white/15 hover:bg-white/20 backdrop-blur-sm rounded-2xl p-3 sm:p-6 border border-white/20 transition-all duration-300 hover:scale-105 cursor-pointer">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <Users className="w-6 h-6" />
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <Users className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold">
+                    <div className="text-xl sm:text-2xl font-bold">
                       {teamStats.totalEngineers}
                     </div>
-                    <div className="text-white/80 text-sm">Total Engineers</div>
+                    <div className="text-white/80 text-xs sm:text-sm">
+                      Total Engineers
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="group bg-white/15 hover:bg-white/20 backdrop-blur-sm rounded-2xl p-6 border border-white/20 transition-all duration-300 hover:scale-105 cursor-pointer">
+              <div className="group bg-white/15 hover:bg-white/20 backdrop-blur-sm rounded-2xl p-3 sm:p-6 border border-white/20 transition-all duration-300 hover:scale-105 cursor-pointer">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <Briefcase className="w-6 h-6" />
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <Briefcase className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold">
+                    <div className="text-xl sm:text-2xl font-bold">
                       {teamStats.activeProjects}
                     </div>
-                    <div className="text-white/80 text-sm">Active Projects</div>
+                    <div className="text-white/80 text-xs sm:text-sm">
+                      Active Projects
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="group bg-white/15 hover:bg-white/20 backdrop-blur-sm rounded-2xl p-6 border border-white/20 transition-all duration-300 hover:scale-105 cursor-pointer">
+              <div className="group bg-white/15 hover:bg-white/20 backdrop-blur-sm rounded-2xl p-3 sm:p-6 border border-white/20 transition-all duration-300 hover:scale-105 cursor-pointer">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-r rounded-full from-orange-400 to-red-400  flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <AlertTriangle className="w-6 h-6" />
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-r rounded-full from-orange-400 to-red-400  flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-orange-200">
+                    <div className="text-xl sm:text-2xl font-bold text-orange-200">
                       {teamStats.overloadedEngineers}
                     </div>
-                    <div className="text-white/80 text-sm">Overloaded</div>
+                    <div className="text-white/80 text-xs sm:text-sm">
+                      Overloaded
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="group bg-white/15 hover:bg-white/20 backdrop-blur-sm rounded-2xl p-6 border border-white/20 transition-all duration-300 hover:scale-105 cursor-pointer">
+              <div className="group bg-white/15 hover:bg-white/20 backdrop-blur-sm rounded-2xl p-3 sm:p-6 border border-white/20 transition-all duration-300 hover:scale-105 cursor-pointer">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <TrendingUp className="w-6 h-6" />
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-green-200">
+                    <div className="text-xl sm:text-2xl font-bold text-green-200">
                       {teamStats.teamEfficiency}%
                     </div>
-                    <div className="text-white/80 text-sm">Team Efficiency</div>
+                    <div className="text-white/80 text-xs sm:text-sm">
+                      Team Efficiency
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
             {/* Additional metrics */}
-            <div className="flex items-center gap-8 mt-6 pt-6 border-t border-white/20">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-8 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-white/20">
               <div className="flex items-center gap-2 text-white/90">
                 <CheckCircle className="w-4 h-4 text-green-300" />
-                <span className="text-sm">
+                <span className="text-xs sm:text-sm">
                   Completed Tasks: {teamStats.completedTasks}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-white/90">
                 <Clock className="w-4 h-4 text-yellow-300" />
-                <span className="text-sm">
+                <span className="text-xs sm:text-sm">
                   Pending Tasks: {teamStats.pendingTasks}
                 </span>
               </div>
@@ -354,27 +362,27 @@ const ManagerDashboard = () => {
         </div>
 
         {/* Team Overview and Projects */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-8">
           {/* Team Overview */}
-          <div className="lg:col-span-2 flex flex-col gap-8">
+          <div className="lg:col-span-2 flex flex-col gap-4 sm:gap-8">
             {/* Engineer List (scrollable) */}
-            <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100 max-h-[600px] overflow-y-auto">
-              <div className="flex flex-col gap-4 justify-between mb-8">
+            <div className="bg-white rounded-3xl shadow-xl p-4 sm:p-8 border border-gray-100 max-h-[400px] sm:max-h-[600px] overflow-y-auto">
+              <div className="flex flex-col gap-4 xl:flex-row sm:gap-8 sm:justify-between mb-4 sm:mb-8">
                 <div>
-                  <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                  <h2 className="text-xl sm:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">
                     Team Overview
                   </h2>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 text-sm sm:text-base">
                     Monitor your engineering team's capacity and performance
                   </p>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="relative">
+                <div className="flex flex-col sm:flex-row gap-2  sm:gap-4 mt-2 sm:mt-0">
+                  <div className="relative flex gap-2 items-center">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <input
                       type="text"
                       placeholder="Search engineers..."
-                      className="pl-11 pr-4 py-3 border border-gray-300 rounded-[8px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 w-64"
+                      className="pl-10 pr-4 py-2 sm:py-3 border border-gray-300 rounded-[8px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 w-full sm:w-64"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -383,7 +391,7 @@ const ManagerDashboard = () => {
                     onValueChange={setSelectedFilter}
                     value={selectedFilter}
                   >
-                    <SelectTrigger className="w-full rounded-[8px] py-5">
+                    <SelectTrigger className="w-full sm:w-auto rounded-[8px] py-3 sm:py-5">
                       <SelectValue placeholder="Select engineer type" />
                     </SelectTrigger>
                     <SelectContent className="w-full bg-white rounded-[8px] flex flex-col gap-5">
@@ -394,79 +402,79 @@ const ManagerDashboard = () => {
                   </Select>
                 </div>
               </div>
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {Array.isArray(filteredEngineers) &&
                 filteredEngineers.length > 0 ? (
                   filteredEngineers.map((engineer: User) => (
                     <div
                       key={engineer._id}
-                      className="group border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:border-blue-200 bg-gradient-to-r from-white to-gray-50"
+                      className="group border border-gray-200 rounded-2xl p-4 sm:p-6 flex flex-col xl:flex-row sm:gap-6 items-start xl:items-center justify-between gap-4 hover:shadow-lg transition-all duration-300 hover:border-blue-200 bg-gradient-to-r from-white to-gray-50"
                     >
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-start gap-4">
-                          <div className="relative">
-                            <UserLogo
-                              code={engineer.code}
-                              color={engineer.color}
-                            />
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-gray-800 text-lg">
-                              {engineer.name}
-                            </h3>
-                            <p className="text-gray-600 text-sm">
-                              {engineer.email}
-                            </p>
-                            <div className="flex items-center gap-2 mt-2">
-                              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                                {engineer.seniority}
-                              </span>
-                              <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
-                                {engineer.department}
-                              </span>
-                            </div>
-                          </div>
+                      <div className="flex items-start gap-4">
+                        <div className="relative">
+                          <UserLogo
+                            code={engineer.code}
+                            color={engineer.color}
+                          />
                         </div>
-                        <div className="text-right">
-                          <div className="flex items-center gap-3 mb-3">
-                            <div className="text-right">
-                              <div className="text-sm font-medium text-gray-600">
-                                {engineer.currentCapacity}% of{" "}
-                                {engineer.maxCapacity}%
-                              </div>
-                            </div>
-                            <div
-                              className={`w-4 h-4 rounded-full bg-gradient-to-r ${getCapacityColor(
-                                Number(engineer.currentCapacity)
-                              )}`}
-                            ></div>
-                          </div>
-                          <div className="w-40 bg-gray-200 rounded-full h-3 mb-2">
-                            <div
-                              className={`h-3 rounded-full transition-all duration-500 bg-gradient-to-r ${getCapacityColor(
-                                Number(engineer.currentCapacity)
-                              )}`}
-                              style={{
-                                width: `${
-                                  (Number(engineer.currentCapacity) /
-                                    Number(engineer.maxCapacity)) *
-                                  100
-                                }%`,
-                              }}
-                            ></div>
-                          </div>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-gray-500">
-                              {getCapacityStatus(
-                                Number(engineer.currentCapacity)
-                              )}
+                        <div>
+                          <h3 className="font-bold text-gray-800 text-base sm:text-lg">
+                            {engineer.name}
+                          </h3>
+                          <p className="text-gray-600 text-xs sm:text-sm">
+                            {engineer.email}
+                          </p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className="bg-blue-100 text-blue-800 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
+                              {engineer.seniority}
+                            </span>
+                            <span className="bg-purple-100 text-purple-800 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
+                              {engineer.department}
                             </span>
                           </div>
                         </div>
                       </div>
-                      <div className="space-y-3">
+                      <div className="text-right w-full xl:w-auto">
+                        <div className="flex items-center gap-3 mb-2 sm:mb-3">
+                          <div className="text-right">
+                            <div className="text-xs sm:text-sm font-medium text-gray-600">
+                              {engineer.currentCapacity}% of{" "}
+                              {engineer.maxCapacity}%
+                            </div>
+                          </div>
+                          <div
+                            className={`w-4 h-4 rounded-full bg-gradient-to-r ${getCapacityColor(
+                              Number(engineer.currentCapacity)
+                            )}`}
+                          ></div>
+                        </div>
+                        <div className="w-full xl:w-40 bg-gray-200 rounded-full h-2 sm:h-3 mb-1 sm:mb-2">
+                          <div
+                            className={`h-2 sm:h-3 rounded-full transition-all duration-500 bg-gradient-to-r ${getCapacityColor(
+                              Number(engineer.currentCapacity)
+                            )}`}
+                            style={{
+                              width: `${Math.min(
+                                100,
+                                (Number(engineer.currentCapacity) /
+                                  Number(engineer.maxCapacity)) *
+                                  100
+                              )}%`,
+                            }}
+                          ></div>
+                        </div>
+
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-gray-500">
+                            {getCapacityStatus(
+                              Number(engineer.currentCapacity)
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="w-full sm:w-auto">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-gray-600">
+                          <span className="text-xs sm:text-sm font-medium text-gray-600">
                             Skills:
                           </span>
                           <div className="flex flex-wrap gap-2">
@@ -475,16 +483,16 @@ const ManagerDashboard = () => {
                               engineer.skills.map((skill, index) => (
                                 <span
                                   key={index}
-                                  className="bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-800 text-xs px-3 py-1 rounded-full font-medium"
+                                  className="bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-800 text-xs px-2 sm:px-3 py-1 rounded-full font-medium"
                                 >
                                   {skill}
                                 </span>
                               ))}
                           </div>
                         </div>
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between mt-2">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-gray-600">
+                            <span className="text-xs sm:text-sm font-medium text-gray-600">
                               Current Projects:
                             </span>
                             <div className="flex flex-wrap gap-2">
@@ -494,7 +502,7 @@ const ManagerDashboard = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600">
+                            <span className="text-xs sm:text-sm text-gray-600">
                               Tasks:{" "}
                               {Array.isArray(engineer.assignments)
                                 ? engineer.assignments.length
@@ -516,41 +524,41 @@ const ManagerDashboard = () => {
               </div>
             </div>
             {/* Assignments Table (show max 4) */}
-            <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100 mt-8">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-gray-800">
+            <div className="bg-white rounded-3xl shadow-xl p-4 sm:p-8 border border-gray-100 mt-4 sm:mt-8">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4">
+                <h2 className="text-lg sm:text-2xl font-bold text-gray-800">
                   Assignments
                 </h2>
                 <button
-                  className="text-blue-600 hover:underline text-sm"
+                  className="text-blue-600 hover:underline text-sm mt-2 sm:mt-0"
                   onClick={() => navigate("/assignments")}
                 >
                   View More
                 </button>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="min-w-full">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Engineer
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Project
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Role
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Allocation
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Timeline
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Completed Task
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
@@ -574,7 +582,7 @@ const ManagerDashboard = () => {
                             key={assignment._id}
                             className="hover:bg-gray-50 "
                           >
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 bg-[#515caa] rounded-full flex items-center justify-center text-white text-sm font-medium">
                                   {engineer && (
@@ -585,45 +593,49 @@ const ManagerDashboard = () => {
                                   )}
                                 </div>
                                 <div>
-                                  <div className="text-sm font-medium text-gray-900">
+                                  <div className="text-xs sm:text-sm font-medium text-gray-900">
                                     {engineer?.name}
                                   </div>
-                                  <div className="text-sm text-gray-500">
+                                  <div className="text-xs sm:text-sm text-gray-500">
                                     {engineer?.department}
                                   </div>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">
+                            <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
+                              <div className="text-xs sm:text-sm font-medium text-gray-900">
                                 {project?.name}
                               </div>
-                              <div className="text-sm text-gray-500">
+                              <div className="text-xs sm:text-sm text-gray-500">
                                 {project?.status}
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="text-sm text-gray-900">
+                            <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
+                              <span className="text-xs sm:text-sm text-gray-900">
                                 {assignment.role}
                               </span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-gray-900">
+                                <span className="text-xs sm:text-sm font-medium text-gray-900">
                                   {assignment.allocation}%
                                 </span>
-                                <div className="w-16 bg-gray-200 rounded-full h-2">
+                                <div className="w-10 sm:w-16 bg-gray-200 rounded-full h-2">
                                   <div
                                     className="h-2 bg-[#515caa] rounded-full"
                                     style={{
-                                      width: `${assignment.allocation}%`,
+                                      width: `${
+                                        assignment.allocation >= 100
+                                          ? 100
+                                          : assignment.allocation
+                                      }%`,
                                     }}
                                   />
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">
+                            <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
+                              <div className="text-xs sm:text-sm text-gray-900">
                                 {new Date(
                                   assignment.startDate
                                 ).toLocaleDateString()}{" "}
@@ -633,7 +645,7 @@ const ManagerDashboard = () => {
                                 ).toLocaleDateString()}
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
                               {assignment &&
                               assignment.status?.toLowerCase() ===
                                 "completed" ? (
@@ -644,7 +656,7 @@ const ManagerDashboard = () => {
                                 <span className="text-gray-400">—</span>
                               )}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                               <div className="flex items-center gap-2">
                                 <button className="p-1 hover:bg-gray-100 rounded transition-colors">
                                   <Edit className="w-4 h-4 text-gray-400" />
@@ -673,31 +685,31 @@ const ManagerDashboard = () => {
             </div>
           </div>
           {/* Projects Side Panel */}
-          <div className="lg:col-span-1 space-y-8">
-            <div className="bg-white rounded-3xl shadow-xl p-6 border border-gray-100">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-8">
+            <div className="bg-white rounded-3xl shadow-xl p-4 sm:p-6 border border-gray-100">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6">
+                <h2 className="text-lg sm:text-2xl font-bold text-gray-800">
                   Active Projects
                 </h2>
                 <button
-                  className="text-blue-600 hover:underline text-sm"
+                  className="text-blue-600 hover:underline text-sm mt-2 sm:mt-0"
                   onClick={() => navigate("/projects")}
                 >
                   View More
                 </button>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {Array.isArray(projectsToShow) && projectsToShow.length > 0 ? (
                   projectsToShow.map((project) => (
                     <div
                       key={project._id}
-                      className="group border border-gray-200 rounded-2xl p-4 hover:shadow-md transition-all duration-300 hover:border-blue-200"
+                      className="group border border-gray-200 rounded-2xl p-3 sm:p-4 hover:shadow-md transition-all duration-300 hover:border-blue-200"
                     >
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-bold text-gray-800">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 sm:mb-3">
+                        <h3 className="font-bold text-gray-800 text-base sm:text-lg">
                           {project.name}
                         </h3>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 mt-2 sm:mt-0">
                           <span
                             className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusColor(
                               project.status
@@ -714,8 +726,8 @@ const ManagerDashboard = () => {
                           </span>
                         </div>
                       </div>
-                      <div className="mb-3">
-                        <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                      <div className="mb-2 sm:mb-3">
+                        <div className="flex items-center justify-between text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">
                           <span>Progress</span>
                           <span className="font-medium">
                             {project.progress || 0}%
@@ -730,14 +742,13 @@ const ManagerDashboard = () => {
                           ></div>
                         </div>
                       </div>
-                      <div className="space-y-2 text-sm text-gray-600">
+                      <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-600">
                         <div className="flex items-center justify-between">
                           <span>Team Size:</span>
                           <span className="font-medium">
                             {project.teamSize} engineers
                           </span>
                         </div>
-
                         <div className="flex items-center justify-between">
                           <span>Days Left:</span>
                           <span className={`font-medium `}>
@@ -745,7 +756,7 @@ const ManagerDashboard = () => {
                           </span>
                         </div>
                       </div>
-                      <div className="mt-3 pt-3 border-t border-gray-100">
+                      <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100">
                         <div className="flex items-center justify-between">
                           <div className="flex flex-wrap gap-1">
                             {(project.requiredSkills || [])
