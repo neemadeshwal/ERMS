@@ -26,6 +26,9 @@ const Register = () => {
               <InitialRegister setIsEngineer={setIsEngineer} />
             )}
           </div>
+          <a href="/login" className="text-blue-600 mt-4  pt-4 hover:underline">
+            Already have an account? Click to login.
+          </a>
         </div>
 
         {/* Right side image – only visible on screens >1048px (md/lg and above) */}

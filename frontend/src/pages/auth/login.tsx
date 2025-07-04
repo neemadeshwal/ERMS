@@ -165,6 +165,9 @@ const Login = () => {
               </Button>
             </form>
           </Form>
+          <a href="/register" className="text-blue-600 mt-4 hover:underline">
+            Don't have an account? Click to create.
+          </a>
         </div>
       </div>
     </div>
