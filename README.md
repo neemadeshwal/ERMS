@@ -42,13 +42,14 @@ npm start
 
 ### 3. Access
 
-- App: http://localhost:3000
-- API: http://localhost:3001
+- Backend:https://erms-backend-56s8.onrender.com
+- Frontend: https://erms-virid.vercel.app/
+
 
 ## Default Login
 
-**Manager**: manager@erms.com / manager123
-**Engineer**: engineer@erms.com / engineer123
+**Manager**: manager@erms.com / Manager@123
+**Engineer**: engineer@erms.com / Engineer@123
 
 ## Key Features
 
@@ -88,21 +89,7 @@ GET  /api/assignments         # List assignments
 POST /api/assignments         # Create assignment
 ```
 
-## Environment Variables
 
-**Backend (.env)**
-
-```
-MONGODB_URI=mongodb://localhost:27017/erms
-JWT_SECRET=your-secret-key
-PORT=3001
-```
-
-**Frontend (.env)**
-
-```
-REACT_APP_API_URL=http://localhost:3001
-```
 
 ## Production Build
 
