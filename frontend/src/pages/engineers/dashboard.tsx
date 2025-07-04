@@ -163,7 +163,7 @@ const EngineerDashboard = () => {
           <div className="mt-6 flex justify-start">
             <button
               className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-3 rounded-[15px] font-medium transition-all duration-200 border border-white/30 hover:border-white/50"
-              onClick={() => navigate("/projects")}
+              onClick={() => navigate("/engineer/projects")}
             >
               View All Projects →
             </button>
