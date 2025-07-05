@@ -145,18 +145,19 @@ const FormInput: React.FC<{
   min,
   max,
 }) => (
-  <div className="space-y-2">
+  <div className="space-y-2 w-full">
     <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
       {icon}
       {label}
     </label>
     <input
       type={type}
-      className={`w-full p-3 border rounded-lg transition-colors ${
-        readOnly
-          ? "bg-gray-50 border-gray-200 cursor-not-allowed"
-          : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-      } ${error ? "border-red-500" : ""}`}
+      className={`w-full p-3 border rounded-lg transition-colors text-base
+        ${
+          readOnly
+            ? "bg-gray-50 border-gray-200 cursor-not-allowed"
+            : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+        } ${error ? "border-red-500" : ""}`}
       value={value}
       readOnly={readOnly}
       placeholder={placeholder}
@@ -193,17 +194,18 @@ const FormSelect: React.FC<{
   icon,
   placeholder,
 }) => (
-  <div className="space-y-2">
+  <div className="space-y-2 w-full">
     <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
       {icon}
       {label}
     </label>
     <select
-      className={`w-full p-3 border rounded-lg transition-colors ${
-        disabled
-          ? "bg-gray-50 border-gray-200 cursor-not-allowed"
-          : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-      } ${error ? "border-red-500" : ""}`}
+      className={`w-full p-3 border rounded-lg transition-colors text-base
+        ${
+          disabled
+            ? "bg-gray-50 border-gray-200 cursor-not-allowed"
+            : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+        } ${error ? "border-red-500" : ""}`}
       value={value}
       disabled={disabled}
       onChange={(e) => onChange(e.target.value)}
@@ -240,7 +242,7 @@ const SkillTags: React.FC<{
   disabled,
   color = "blue",
 }) => (
-  <div className="space-y-3">
+  <div className="space-y-2 w-full">
     <label className="block text-sm font-medium text-gray-700">{label}</label>
     <div className="flex flex-wrap gap-2">
       {availableItems.map((item) => {
@@ -249,17 +251,19 @@ const SkillTags: React.FC<{
           <button
             key={item}
             type="button"
-            className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ${
-              isSelected
-                ? color === "blue"
-                  ? "bg-blue-600 text-white border-blue-600 shadow-md"
-                  : "bg-green-600 text-white border-green-600 shadow-md"
-                : "bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100"
-            } ${
-              disabled
-                ? "opacity-50 cursor-not-allowed"
-                : "cursor-pointer hover:scale-105"
-            }`}
+            className={`px-3 py-1 rounded-full border text-xs font-medium transition-all
+              ${
+                isSelected
+                  ? color === "blue"
+                    ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                    : "bg-green-600 text-white border-green-600 shadow-md"
+                  : "bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100"
+              }
+              ${
+                disabled
+                  ? "opacity-50 cursor-not-allowed"
+                  : "cursor-pointer hover:scale-105"
+              }`}
             disabled={disabled}
             onClick={() => onChange(item)}
           >
@@ -290,7 +294,7 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
 
   return (
     <span
-      className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+      className={`px-3 py-1 rounded-full text-xs md:text-sm font-medium ${getStatusColor(
         status
       )}`}
     >
@@ -313,7 +317,7 @@ const CapacityBar: React.FC<{ current: number; max: number }> = ({
 
   return (
     <div className="space-y-2">
-      <div className="flex justify-between text-sm text-gray-200">
+      <div className="flex justify-between text-xs text-gray-500">
         <span>
           Capacity: {current}/{max}
         </span>
@@ -341,7 +345,6 @@ const EngineerProfile: React.FC = () => {
     "idle" | "saving" | "success" | "error"
   >("idle");
 
-  // Populate formData from user context, using Zod to coerce/validate
   useEffect(() => {
     if (authUser) {
       const parsed = UserSchema.safeParse(authUser);
@@ -349,7 +352,6 @@ const EngineerProfile: React.FC = () => {
     }
   }, [authUser]);
 
-  // Validation function
   const validateForm = (data: ProfileUser): ValidationErrors => {
     try {
       UserSchema.parse(data);
@@ -367,23 +369,18 @@ const EngineerProfile: React.FC = () => {
     }
   };
 
-  // Handle form field changes
   const handleChange = (field: keyof ProfileUser, value: string | number) => {
     setFormData((prev) => {
       if (!prev) return null;
       const updated = { ...prev, [field]: value };
-
-      // Clear validation error for this field
       setValidationErrors((prevErrors) => ({
         ...prevErrors,
         [field]: undefined,
       }));
-
       return updated;
     });
   };
 
-  // Handle array field changes (skills, preferredProjectTypes)
   const handleArrayChange = (field: keyof ProfileUser, value: string) => {
     setFormData((prev) => {
       if (!prev) return null;
@@ -398,31 +395,19 @@ const EngineerProfile: React.FC = () => {
     });
   };
 
-  // Save form data
   const handleSave = async () => {
     if (!formData) return;
-
-    // Validate form
     const errors = validateForm(formData);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-
     setSaveStatus("saving");
-
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Here you would make your actual API call
-      // await axios.put(`/api/users/${formData._id}`, formData);
-
       setSaveStatus("success");
       setIsEditing(false);
       setValidationErrors({});
-
-      // Reset success status after 3 seconds
       setTimeout(() => setSaveStatus("idle"), 3000);
     } catch (error) {
       setSaveStatus("error");
@@ -430,7 +415,6 @@ const EngineerProfile: React.FC = () => {
     }
   };
 
-  // Cancel editing
   const handleCancel = () => {
     if (authUser) {
       const parsed = UserSchema.safeParse(authUser);
@@ -451,8 +435,8 @@ const EngineerProfile: React.FC = () => {
   }
 
   return (
-    <div className="p-8 space-y-8 max-w-6xl mx-auto">
-      {/* Success/Error Alerts */}
+    <div className=" sm:p-4 md:p-8 space-y-6 max-w-6xl mx-auto w-full">
+      {/* Alerts */}
       {saveStatus === "success" && (
         <Alert className="border-green-200 bg-green-50">
           <CheckCircle className="h-4 w-4 text-green-600" />
@@ -461,7 +445,6 @@ const EngineerProfile: React.FC = () => {
           </AlertDescription>
         </Alert>
       )}
-
       {saveStatus === "error" && (
         <Alert className="border-red-200 bg-red-50">
           <AlertCircle className="h-4 w-4 text-red-600" />
@@ -472,30 +455,30 @@ const EngineerProfile: React.FC = () => {
       )}
 
       {/* Profile Header */}
-      <div className="bg-gradient-to-r from-[#3e456f] via-[#4a5280] to-[#525b95] rounded-2xl p-8 text-white shadow-xl">
-        <div className="flex items-start gap-6 mb-6">
-          <div className="flex-shrink-0">
+      <div className="bg-gradient-to-r from-[#3e456f] via-[#4a5280] to-[#525b95] rounded-2xl p-4 sm:p-8 text-white shadow-xl">
+        <div className="flex flex-col md:flex-row items-start gap-4 md:gap-6 mb-4 md:mb-6">
+          <div className="flex-shrink-0 self-center md:self-start">
             {formData.code && formData.color ? (
               <UserLogo color={formData.color} code={formData.code} />
             ) : (
-              <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm border-4 border-white/30 shadow-lg flex items-center justify-center text-3xl font-bold text-white">
+              <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/20 backdrop-blur-sm border-4 border-white/30 shadow-lg flex items-center justify-center text-3xl font-bold text-white">
                 {formData.code || formData.name?.charAt(0).toUpperCase()}
               </div>
             )}
           </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold">
+          <div className="flex-1 w-full">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-2">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold break-all">
                 {formData.name.toUpperCase()}
               </h1>
               <StatusBadge status={formData.status || "active"} />
             </div>
-            <p className="text-white/90 text-lg mb-4">
+            <p className="text-white/90 text-base md:text-lg mb-2 md:mb-4 break-all">
               {formData.role?.charAt(0).toUpperCase() + formData.role?.slice(1)}{" "}
               • {formData.department}
               {formData.team && ` • ${formData.team}`}
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-white/80">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-xs sm:text-sm text-white/80">
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
                 <span>{formData.location || "—"}</span>
@@ -519,30 +502,28 @@ const EngineerProfile: React.FC = () => {
             </div>
           </div>
         </div>
-
         {/* Capacity Bar */}
-        <div className="mb-6">
+        <div className="mb-4 md:mb-6">
           <CapacityBar
             current={formData.currentCapacity || 0}
             max={formData.maxCapacity || 100}
           />
         </div>
-
         {/* Action Buttons */}
-        <div className="flex justify-end">
+        <div className="flex flex-col sm:flex-row justify-end gap-2">
           {!isEditing ? (
             <button
               onClick={() => setIsEditing(true)}
-              className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-xl font-medium flex items-center gap-2 transition-all backdrop-blur-sm"
+              className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-xl font-medium flex items-center gap-2 transition-all backdrop-blur-sm"
             >
               <Edit3 className="w-5 h-5" />
               Edit Profile
             </button>
           ) : (
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2">
               <button
                 onClick={handleCancel}
-                className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-xl font-medium flex items-center gap-2 transition-all backdrop-blur-sm"
+                className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-xl font-medium flex items-center gap-2 transition-all backdrop-blur-sm"
               >
                 <X className="w-4 h-4" />
                 Cancel
@@ -550,7 +531,7 @@ const EngineerProfile: React.FC = () => {
               <button
                 onClick={handleSave}
                 disabled={saveStatus === "saving"}
-                className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-6 py-3 rounded-xl font-medium flex items-center gap-2 transition-all shadow-lg"
+                className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-xl font-medium flex items-center gap-2 transition-all shadow-lg"
               >
                 {saveStatus === "saving" ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -565,9 +546,9 @@ const EngineerProfile: React.FC = () => {
       </div>
 
       {/* Profile Details */}
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {/* Basic Information */}
+      <div className="bg-white rounded-2xl shadow-lg p-2 sm:p-4 md:p-8 border border-gray-100 overflow-x-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8">
+          {/* All field components as before */}
           <FormInput
             label="Full Name"
             value={formData.name || ""}
@@ -577,7 +558,6 @@ const EngineerProfile: React.FC = () => {
             icon={<User className="w-4 h-4" />}
             placeholder="Enter full name"
           />
-
           <FormInput
             label="Email Address"
             value={formData.email || ""}
@@ -588,7 +568,6 @@ const EngineerProfile: React.FC = () => {
             icon={<Mail className="w-4 h-4" />}
             placeholder="Enter email address"
           />
-
           <FormInput
             label="Phone Number"
             value={formData.phone || ""}
@@ -599,7 +578,6 @@ const EngineerProfile: React.FC = () => {
             icon={<Phone className="w-4 h-4" />}
             placeholder="Enter phone number"
           />
-
           <FormSelect
             label="Role"
             value={formData.role || ""}
@@ -610,7 +588,6 @@ const EngineerProfile: React.FC = () => {
             icon={<Briefcase className="w-4 h-4" />}
             placeholder="Select role"
           />
-
           <FormInput
             label="Department"
             value={formData.department || ""}
@@ -620,7 +597,6 @@ const EngineerProfile: React.FC = () => {
             icon={<Building className="w-4 h-4" />}
             placeholder="Enter department"
           />
-
           <FormInput
             label="Team"
             value={formData.team || ""}
@@ -630,7 +606,6 @@ const EngineerProfile: React.FC = () => {
             icon={<Users className="w-4 h-4" />}
             placeholder="Enter team"
           />
-
           <FormSelect
             label="Seniority Level"
             value={formData.seniority || ""}
@@ -641,7 +616,6 @@ const EngineerProfile: React.FC = () => {
             icon={<Award className="w-4 h-4" />}
             placeholder="Select seniority level"
           />
-
           <FormInput
             label="Years of Experience"
             value={formData.yearsOfExperience || 0}
@@ -655,7 +629,6 @@ const EngineerProfile: React.FC = () => {
             min={0}
             max={50}
           />
-
           <FormInput
             label="Location"
             value={formData.location || ""}
@@ -665,7 +638,6 @@ const EngineerProfile: React.FC = () => {
             icon={<MapPin className="w-4 h-4" />}
             placeholder="Enter location"
           />
-
           <FormInput
             label="Timezone"
             value={formData.timezone || ""}
@@ -675,7 +647,6 @@ const EngineerProfile: React.FC = () => {
             icon={<Clock className="w-4 h-4" />}
             placeholder="Enter timezone"
           />
-
           <FormSelect
             label="Employment Type"
             value={formData.employmentType || ""}
@@ -686,7 +657,6 @@ const EngineerProfile: React.FC = () => {
             icon={<Briefcase className="w-4 h-4" />}
             placeholder="Select employment type"
           />
-
           <FormSelect
             label="Work Type"
             value={formData.workType || ""}
@@ -697,7 +667,6 @@ const EngineerProfile: React.FC = () => {
             icon={<Building className="w-4 h-4" />}
             placeholder="Select work type"
           />
-
           <FormSelect
             label="Status"
             value={formData.status || ""}
@@ -708,7 +677,6 @@ const EngineerProfile: React.FC = () => {
             icon={<Target className="w-4 h-4" />}
             placeholder="Select status"
           />
-
           <FormInput
             label="Hire Date"
             value={formData.hireDate ? formData.hireDate.slice(0, 10) : ""}
@@ -718,7 +686,6 @@ const EngineerProfile: React.FC = () => {
             error={validationErrors.hireDate}
             icon={<Calendar className="w-4 h-4" />}
           />
-
           <FormInput
             label="Available From"
             value={
@@ -730,7 +697,6 @@ const EngineerProfile: React.FC = () => {
             error={validationErrors.availableFrom}
             icon={<Calendar className="w-4 h-4" />}
           />
-
           <FormInput
             label="Maximum Capacity"
             value={formData.maxCapacity || 0}
@@ -744,7 +710,6 @@ const EngineerProfile: React.FC = () => {
             min={0}
             max={100}
           />
-
           <FormInput
             label="Current Capacity"
             value={formData.currentCapacity || 0}
@@ -761,7 +726,7 @@ const EngineerProfile: React.FC = () => {
         </div>
 
         {/* Skills Section */}
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           <SkillTags
             label="Technical Skills"
             selectedItems={formData.skills || []}
@@ -770,7 +735,6 @@ const EngineerProfile: React.FC = () => {
             disabled={!isEditing}
             color="blue"
           />
-
           <SkillTags
             label="Preferred Project Types"
             selectedItems={formData.preferredProjectTypes || []}
