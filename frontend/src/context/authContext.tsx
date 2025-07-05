@@ -1,6 +1,8 @@
+// src/context/authContext.tsx
+
 import { getUser } from "@/actions/auth/auth-action";
 import type { User } from "@/types/types";
-import {
+import React, {
   createContext,
   useContext,
   useEffect,
@@ -8,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 
+// --- Types ---
 interface AuthContextType {
   token: string | null;
   role: string | null;
@@ -23,13 +26,19 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// --- Role-based Dashboard Route Helper ---
+export function getDashboardRoute(role: string | null) {
+  if (role === "manager") return "/manager";
+  if (role === "engineer") return "/engineer";
+  // Add more roles as needed
+  return "/";
+}
 
+// --- Cookie Helpers ---
 const setCookie = (name: string, value: string, days = 7) => {
   const expires = new Date();
   expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
 
-  // Enhanced cookie settings for production
   const cookieSettings = [
     `${name}=${value}`,
     `expires=${expires.toUTCString()}`,
@@ -37,7 +46,6 @@ const setCookie = (name: string, value: string, days = 7) => {
     `SameSite=Strict`,
   ];
 
-  // Only add Secure flag in production (HTTPS)
   if (window.location.protocol === "https:") {
     cookieSettings.push("Secure");
   }
@@ -69,23 +77,23 @@ const deleteCookie = (name: string) => {
     `path=/`,
     `SameSite=Strict`,
   ];
-
-  // Only add Secure flag in production (HTTPS)
   if (window.location.protocol === "https:") {
     cookieSettings.push("Secure");
   }
-
   document.cookie = cookieSettings.join(";");
 };
 
-export const AuthProvider = (props: AuthProviderProps) => {
-  const { children } = props;
+// --- Auth Context ---
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
+  // Fetch user from API using token
   const refreshUser = async () => {
     if (token) {
       setIsLoading(true);
@@ -94,16 +102,12 @@ export const AuthProvider = (props: AuthProviderProps) => {
         if (data && data.success && data.user) {
           setUser(data.user);
           setRole(data.user.role);
-          // Update role cookie in case it changed
           setCookie("userRole", data.user.role);
         } else {
-          // Token is invalid, clear everything
-          console.warn("Token validation failed, logging out");
           logout();
         }
       } catch (err) {
         console.error("Error refreshing user:", err);
-        // Token is invalid, clear everything
         logout();
       } finally {
         setIsLoading(false);
@@ -115,31 +119,21 @@ export const AuthProvider = (props: AuthProviderProps) => {
     }
   };
 
-  // Initialize auth state from cookies on app start
+  // On mount, initialize from cookies
   useEffect(() => {
     try {
       const storedToken = getCookie("authToken");
       const storedRole = getCookie("userRole");
-
-      console.log("Initializing auth state:", {
-        hasToken: !!storedToken,
-        hasRole: !!storedRole,
-        environment: process.env.NODE_ENV,
-      });
-
       if (storedToken && storedRole) {
         setToken(storedToken);
         setRole(storedRole);
       } else {
-        // Clear any partial auth state
         setToken(null);
         setRole(null);
         setUser(null);
         setIsLoading(false);
       }
     } catch (error) {
-      console.error("Error initializing auth state:", error);
-      // Clear everything on error
       setToken(null);
       setRole(null);
       setUser(null);
@@ -149,7 +143,7 @@ export const AuthProvider = (props: AuthProviderProps) => {
     }
   }, []);
 
-  // Refresh user data when token changes and after initialization
+  // Refresh user when token changes or after initialization
   useEffect(() => {
     if (isInitialized) {
       refreshUser();
@@ -157,27 +151,16 @@ export const AuthProvider = (props: AuthProviderProps) => {
     // eslint-disable-next-line
   }, [token, isInitialized]);
 
+  // Login: set token, role, and cookies
   const login = (newToken: string, userRole: string) => {
-    try {
-      console.log("Logging in user:", {
-        role: userRole,
-        environment: process.env.NODE_ENV,
-      });
-
-      setToken(newToken);
-      setRole(userRole);
-      setCookie("authToken", newToken, 7); // Set for 7 days
-      setCookie("userRole", userRole, 7); // Set for 7 days
-
-      console.log("Login successful, cookies set");
-    } catch (error) {
-      console.error("Error during login:", error);
-      throw error; // Re-throw to handle in component
-    }
+    setToken(newToken);
+    setRole(userRole);
+    setCookie("authToken", newToken, 7);
+    setCookie("userRole", userRole, 7);
   };
 
+  // Logout: clear everything
   const logout = () => {
-    console.log("Logging out user");
     setToken(null);
     setRole(null);
     setUser(null);
@@ -203,6 +186,7 @@ export const AuthProvider = (props: AuthProviderProps) => {
   );
 };
 
+// --- Hook to use Auth Context ---
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {

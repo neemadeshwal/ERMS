@@ -22,8 +22,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateNewUser } from "@/actions/auth/auth-action";
 import { useRegisterStore } from "@/zustand/registerStore";
-import { useAuth } from "@/context/authContext";
-import { useNavigate } from "react-router-dom";
+import { getDashboardRoute, useAuth } from "@/context/authContext";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 // Sample skills
@@ -46,7 +46,7 @@ const registerEngineerSchema = z.object({
 });
 
 const RegisterEngineer = () => {
-  const { login } = useAuth();
+  const { login, role, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -156,7 +156,9 @@ const RegisterEngineer = () => {
       </div>
     );
   }
-
+  if (isAuthenticated) {
+    return <Navigate to={getDashboardRoute(role)} replace />;
+  }
   return (
     <div className="">
       <Form {...form}>

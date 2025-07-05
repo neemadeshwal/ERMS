@@ -20,8 +20,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { LoginUser } from "@/actions/auth/auth-action";
-import { useAuth } from "@/context/authContext";
-import { useNavigate } from "react-router-dom";
+import { getDashboardRoute, useAuth } from "@/context/authContext";
+import { Navigate, useNavigate } from "react-router-dom";
 import Loader from "@/features/loader";
 
 const formSchema = z.object({
@@ -50,7 +50,7 @@ const Login = () => {
       password: "",
     },
   });
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, role, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -75,7 +75,9 @@ const Login = () => {
       </div>
     );
   }
-
+  if (isAuthenticated) {
+    return <Navigate to={getDashboardRoute(role)} replace />;
+  }
   return (
     <div className="h-full max-width">
       <div className="flex justify-center items-center h-full">

@@ -22,8 +22,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { CreateNewUser } from "@/actions/auth/auth-action";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/authContext";
+import { Navigate, useNavigate } from "react-router-dom";
+import { getDashboardRoute, useAuth } from "@/context/authContext";
 
 const formSchema = z.object({
   name: z
@@ -61,7 +61,7 @@ const InitialRegister = ({ setIsEngineer }: { setIsEngineer: any }) => {
   const [isManager, setIsManager] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login } = useAuth();
+  const { login, isAuthenticated, role } = useAuth();
   const { setBasicInfo } = useRegisterStore();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -129,7 +129,9 @@ const InitialRegister = ({ setIsEngineer }: { setIsEngineer: any }) => {
       }
     }
   }
-
+  if (isAuthenticated) {
+    return <Navigate to={getDashboardRoute(role)} replace />;
+  }
   return (
     <div className="">
       <Form {...form}>
