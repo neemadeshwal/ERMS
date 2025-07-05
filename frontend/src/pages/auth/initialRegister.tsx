@@ -51,25 +51,58 @@ const InitialRegister = ({ setIsEngineer }: { setIsEngineer: any }) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
+      role: "",
     },
   });
   const navigate = useNavigate();
   const [isManager, setIsManager] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { login } = useAuth();
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    if (values.role === "engineer") {
-      useRegisterStore.getState().setBasicInfo(values);
-      setIsEngineer(true);
-    } else {
-      setIsEngineer(false);
-      const createdUser = await CreateNewUser(values);
-      if (createdUser.success && createdUser.token) {
-        login(createdUser.token, createdUser.user.roles); // set token in context and cookie
-        navigate("/manager");
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      console.log("Submitting values:", values);
+
+      if (values.role === "engineer") {
+        // Store basic info and continue to engineer registration
+        useRegisterStore.getState().setBasicInfo(values);
+        setIsEngineer(true);
+        setIsLoading(false);
+      } else {
+        // Create manager account directly
+        const createdUser = await CreateNewUser(values);
+
+        console.log("CreateNewUser response:", createdUser);
+
+        if (createdUser?.success && createdUser?.token) {
+          // Use consistent role format - get role from user object
+          const userRole =
+            createdUser.user?.role || createdUser.user?.roles || values.role;
+
+          login(createdUser.token, userRole);
+          navigate("/manager");
+        } else {
+          // Handle API error
+          const errorMessage =
+            createdUser?.message ||
+            createdUser?.error ||
+            "Failed to create account. Please try again.";
+          setError(errorMessage);
+          console.error("Account creation failed:", createdUser);
+        }
       }
+    } catch (error) {
+      console.error("Registration error:", error);
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -77,6 +110,12 @@ const InitialRegister = ({ setIsEngineer }: { setIsEngineer: any }) => {
     <div className="">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[8px] text-sm">
+              {error}
+            </div>
+          )}
+
           <FormField
             control={form.control}
             name="name"
@@ -104,6 +143,7 @@ const InitialRegister = ({ setIsEngineer }: { setIsEngineer: any }) => {
                   <Input
                     className="rounded-[8px] py-5 placeholder:text-gray-500"
                     placeholder="Enter your email address"
+                    type="email"
                     {...field}
                   />
                 </FormControl>
@@ -121,10 +161,10 @@ const InitialRegister = ({ setIsEngineer }: { setIsEngineer: any }) => {
                   <Input
                     className="rounded-[8px] py-5 placeholder:text-gray-500"
                     placeholder="Enter your password"
+                    type="password"
                     {...field}
                   />
                 </FormControl>
-
                 <FormMessage className="text-[12px] mt-0 text-red-500" />
               </FormItem>
             )}
@@ -138,13 +178,13 @@ const InitialRegister = ({ setIsEngineer }: { setIsEngineer: any }) => {
                 <Select
                   onValueChange={(val) => {
                     field.onChange(val);
-                    if (val == "engineer") {
+                    if (val === "engineer") {
                       setIsManager(false);
                     } else {
                       setIsManager(true);
                     }
                   }}
-                  defaultValue={field.value}
+                  value={field.value}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full rounded-[8px] py-5">
@@ -152,14 +192,14 @@ const InitialRegister = ({ setIsEngineer }: { setIsEngineer: any }) => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="w-full bg-white rounded-[8px] flex flex-col gap-5">
-                    <SelectItem value="manager" className=" text-[15px]">
-                      manager
+                    <SelectItem value="manager" className="text-[15px]">
+                      Manager
                     </SelectItem>
                     <SelectItem
                       value="engineer"
                       className="text-[15px] hover:bg-gray-50 cursor-pointer"
                     >
-                      engineer
+                      Engineer
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -168,10 +208,11 @@ const InitialRegister = ({ setIsEngineer }: { setIsEngineer: any }) => {
             )}
           />
           <Button
-            className="bg-[#5c66a7] hover:bg-[#525b95] rounded-[8px] py-5  cursor-pointer w-full text-white"
+            className="bg-[#5c66a7] hover:bg-[#525b95] rounded-[8px] py-5 cursor-pointer w-full text-white disabled:opacity-50"
             type="submit"
+            disabled={isLoading}
           >
-            {isManager ? "Submit" : "Continue"}
+            {isLoading ? "Loading..." : isManager ? "Submit" : "Continue"}
           </Button>
         </form>
       </Form>

@@ -17,13 +17,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateNewUser } from "@/actions/auth/auth-action";
 import { useRegisterStore } from "@/zustand/registerStore";
 import { useAuth } from "@/context/authContext";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 // Sample skills
 const skillsList = [
@@ -47,6 +48,8 @@ const registerEngineerSchema = z.object({
 const RegisterEngineer = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof registerEngineerSchema>>({
     resolver: zodResolver(registerEngineerSchema),
@@ -59,13 +62,16 @@ const RegisterEngineer = () => {
   });
 
   const onSubmit = async (data: z.infer<typeof registerEngineerSchema>) => {
+    setIsLoading(true);
+    setError(null);
+
     try {
       console.log("Extended Profile:", data);
       const basicInfo = useRegisterStore.getState().basicInfo;
 
       if (!basicInfo) {
-        // Handle error: basic info not found (user skipped step 1)
-        alert("Basic info missing. Please complete step 1.");
+        setError("Basic info missing. Please complete step 1.");
+        setIsLoading(false);
         return;
       }
 
@@ -74,13 +80,34 @@ const RegisterEngineer = () => {
         ...basicInfo,
         ...data,
       };
+
+      console.log("Final payload:", payload);
+
       const createdUser = await CreateNewUser(payload);
-      if (createdUser.success && createdUser.token) {
-        login(createdUser.token, createdUser.user.role); // set token and role in context and cookie
+
+      console.log("CreateNewUser response:", createdUser);
+
+      if (createdUser?.success && createdUser?.token) {
+        // Use consistent role format - get role from user object
+        const userRole =
+          createdUser.user?.role || createdUser.user?.roles || "engineer";
+
+        login(createdUser.token, userRole);
         navigate("/engineer");
+      } else {
+        // Handle API error
+        const errorMessage =
+          createdUser?.message ||
+          createdUser?.error ||
+          "Failed to create account. Please try again.";
+        setError(errorMessage);
+        console.error("Account creation failed:", createdUser);
       }
     } catch (error) {
-      console.log(error);
+      console.error("Registration error:", error);
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -88,6 +115,12 @@ const RegisterEngineer = () => {
     <div className="">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[8px] text-sm">
+              {error}
+            </div>
+          )}
+
           {/* Skills Multi-select (using checkboxes for simplicity) */}
           <FormField
             control={form.control}
@@ -116,7 +149,7 @@ const RegisterEngineer = () => {
                     </label>
                   ))}
                 </div>
-                <FormMessage />
+                <FormMessage className="text-[12px] mt-0 text-red-500" />
               </FormItem>
             )}
           />
@@ -158,7 +191,7 @@ const RegisterEngineer = () => {
                     </SelectItem>
                   </SelectContent>
                 </Select>
-                <FormMessage />
+                <FormMessage className="text-[12px] mt-0 text-red-500" />
               </FormItem>
             )}
           />
@@ -191,7 +224,7 @@ const RegisterEngineer = () => {
                     </SelectItem>
                   </SelectContent>
                 </Select>
-                <FormMessage />
+                <FormMessage className="text-[12px] mt-0 text-red-500" />
               </FormItem>
             )}
           />
@@ -210,15 +243,16 @@ const RegisterEngineer = () => {
                     {...field}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-[12px] mt-0 text-red-500" />
               </FormItem>
             )}
           />
           <Button
-            className="bg-[#5c66a7] hover:bg-[#525b95] rounded-[8px] py-5  cursor-pointer w-full text-white"
+            className="bg-[#5c66a7] hover:bg-[#525b95] rounded-[8px] py-5 cursor-pointer w-full text-white disabled:opacity-50"
             type="submit"
+            disabled={isLoading}
           >
-            Submit
+            {isLoading ? "Creating Account..." : "Submit"}
           </Button>
         </form>
       </Form>
