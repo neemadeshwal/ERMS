@@ -8,10 +8,12 @@ import cors from "cors";
 const app = express();
 app.use(
   cors({
-    origin: true,
+    origin: "https://erms-virid.vercel.app", // exact origin
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
 );
+
 app.use(express.json());
 app.use("/api/auth", userRouter);
 app.use("/api/assignments", AssignmentRouter);

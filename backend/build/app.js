@@ -12,8 +12,9 @@ const error_middleware_1 = require("./middleware/error.middleware");
 const cors_1 = __importDefault(require("cors"));
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)({
-    origin: true,
+    origin: "https://erms-virid.vercel.app", // exact origin
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 }));
 app.use(express_1.default.json());
 app.use("/api/auth", user_routes_1.default);
