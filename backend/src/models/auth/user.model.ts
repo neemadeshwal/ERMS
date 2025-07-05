@@ -81,7 +81,7 @@ const userSchema = new Schema(
 
     seniority: {
       type: String,
-      enum: ["senior", "mid", "junior", "intern", "staff"],
+      enum: ["senior", "mid", "junior"],
     },
 
     department: {

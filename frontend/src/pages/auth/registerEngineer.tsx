@@ -31,11 +31,26 @@ import { Loader } from "lucide-react";
 // Sample skills
 const skillsList = [
   "React",
+  "Vue",
+  "Angular",
+  "JavaScript",
+  "TypeScript",
   "Node.js",
   "Python",
-  "TypeScript",
-  "Docker",
+  "Java",
+  "Go",
+  "Rust",
+  "MongoDB",
+  "PostgreSQL",
+  "MySQL",
+  "Redis",
   "AWS",
+  "Docker",
+  "Kubernetes",
+  "CI/CD",
+  "Mobile Development",
+  "DevOps",
+  "Testing",
 ];
 
 // Schema (ensure enum values match your select values)

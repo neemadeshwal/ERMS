@@ -116,7 +116,7 @@ const userSchema = new mongoose_1.Schema({
     },
     seniority: {
         type: String,
-        enum: ["senior", "mid", "junior", "intern", "staff"],
+        enum: ["senior", "mid", "junior"],
     },
     department: {
         type: String,
