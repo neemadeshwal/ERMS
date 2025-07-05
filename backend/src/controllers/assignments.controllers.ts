@@ -82,7 +82,9 @@ export const createAssignment = asyncErrorHandler(
 // READ All Assignments
 export const getAllAssignments = asyncErrorHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const assignments = await Assignment.find();
+    const assignments = await Assignment.find()
+      .populate("engineerId")
+      .populate("projectId");
     res.status(200).json({
       success: true,
       assignments,

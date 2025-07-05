@@ -2,6 +2,10 @@ import mongoose, { Schema, Types } from "mongoose";
 
 const assignmentSchema = new Schema(
   {
+    description: {
+      type: String,
+      required: [true, "Please provide description."],
+    },
     engineerId: [
       {
         type: Types.ObjectId,

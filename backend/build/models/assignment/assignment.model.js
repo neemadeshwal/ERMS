@@ -36,6 +36,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Assignment = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const assignmentSchema = new mongoose_1.Schema({
+    description: {
+        type: String,
+        required: [true, "Please provide description."],
+    },
     engineerId: [
         {
             type: mongoose_1.Types.ObjectId,
