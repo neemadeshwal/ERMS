@@ -29,12 +29,26 @@ import { toast } from "sonner";
 // Example skills list (replace with your real skills data)
 const skillsList = [
   "React",
+  "Vue",
+  "Angular",
+  "JavaScript",
+  "TypeScript",
   "Node.js",
   "Python",
-  "TypeScript",
-  "AWS",
+  "Java",
+  "Go",
+  "Rust",
   "MongoDB",
-  "Django",
+  "PostgreSQL",
+  "MySQL",
+  "Redis",
+  "AWS",
+  "Docker",
+  "Kubernetes",
+  "CI/CD",
+  "Mobile Development",
+  "DevOps",
+  "Testing",
 ];
 export const projectSchema = z.object({
   name: z.string().min(2, "Project name is required"),
@@ -161,7 +175,7 @@ export default function ProjectForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 max-w-[1400px] overflow-auto max-h-[70%] md:max-h-[80%] lg:max-h-[80%] z-[-10]"
+        className="space-y-8 max-w-[1400px] overflow-auto max-h-[70vh]  z-[-10]"
       >
         {/* Project Name */}
         <FormField
@@ -290,7 +304,7 @@ export default function ProjectForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="bg-white">
-                    <SelectItem value="planning">Planning</SelectItem>
+                    <SelectItem value="on-hold">Onhold</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
                   </SelectContent>

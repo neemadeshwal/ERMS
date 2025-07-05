@@ -12,7 +12,7 @@ import {
   Edit,
   Trash2,
   Eye,
-  MoreHorizontal,
+  UserIcon,
 } from "lucide-react";
 import {
   Dialog,
@@ -26,6 +26,7 @@ import AssignmentForm from "./assignmentForm";
 import { useAuth } from "@/context/authContext";
 import { getAllAssignments } from "@/actions/assignments/assignment-action";
 import { useNavigate } from "react-router-dom";
+import UserLogo from "@/features/userLogo";
 
 const ComprehensiveAssignmentsManager = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -70,10 +71,10 @@ const ComprehensiveAssignmentsManager = () => {
     if (!Array.isArray(assignments) || assignments.length === 0) return [];
     return assignments.filter((assignment) => {
       const matchesSearch =
-        assignment.engineerName
+        assignment?.engineerId[0]?.name
           ?.toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
-        assignment.projectName
+        assignment.project.name
           ?.toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
         assignment.role?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -91,13 +92,13 @@ const ComprehensiveAssignmentsManager = () => {
     return [...filteredAssignments].sort((a, b) => {
       let aValue, bValue;
       switch (sortBy) {
-        case "engineer":
-          aValue = a.engineerName || "";
-          bValue = b.engineerName || "";
+        case "engineerId":
+          aValue = a?.engineerId[0]?.name || "";
+          bValue = b?.engineerId[0]?.name || "";
           break;
         case "project":
-          aValue = a.projectName || "";
-          bValue = b.projectName || "";
+          aValue = a.project.name || "";
+          bValue = b.project.name || "";
           break;
         case "allocation":
           aValue = a.allocation || 0;
@@ -284,7 +285,7 @@ const ComprehensiveAssignmentsManager = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
-                placeholder="Search assignments by engineer, project, or role..."
+                placeholder="Search assignments by engineerId, project, or role..."
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-[12px] sm:rounded-[15px] focus:ring-2 focus:ring-[#515caa] focus:border-transparent text-sm sm:text-base"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -331,133 +332,145 @@ const ComprehensiveAssignmentsManager = () => {
             sortedAssignments.length > 0 ? (
             sortedAssignments.map((assignment) => {
               const isSelected = selectedAssignments.includes(assignment.id);
-
+              console.log(assignment.description);
               return (
                 <div
-                  onClick={() => navigate(`${assignment.id}`)}
-                  key={assignment.id}
-                  className={`bg-white rounded-[12px] sm:rounded-[20px] shadow-sm border hover:shadow-md transition-all ${
-                    isSelected
-                      ? "border-[#515caa] ring-2 ring-[#515caa] ring-opacity-20"
-                      : "border-gray-200"
-                  }`}
+                  onClick={() => navigate(`${assignment._id}`)}
+                  key={assignment._id}
                 >
-                  <div className="p-4 sm:p-6">
-                    {/* Header */}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 sm:mb-4 gap-2">
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={(e) => {
-                            e.stopPropagation();
-                            handleSelectAssignment(assignment.id);
-                          }}
-                          className="w-4 h-4 text-[#515caa] rounded border-gray-300 focus:ring-[#515caa]"
-                        />
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#515caa] rounded-full flex items-center justify-center text-white font-medium">
-                          {assignment.engineerAvatar ||
-                            assignment.engineerName?.[0] ||
-                            "E"}
+                  <div
+                    className={`bg-white rounded-[12px] sm:rounded-[20px] shadow-sm border hover:shadow-md transition-all ${
+                      isSelected
+                        ? "border-[#515caa] ring-2 ring-[#515caa] ring-opacity-20"
+                        : "border-gray-200"
+                    }`}
+                  >
+                    <div className="p-4 sm:p-6">
+                      {/* Header */}
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 sm:mb-4 gap-2">
+                        <div className="flex items-start gap-3 sm:gap-5">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              handleSelectAssignment(assignment.id);
+                            }}
+                            className="w-4 h-4 text-[#515caa] rounded border-gray-300 focus:ring-[#515caa]"
+                          />
+                          <div className="flex flex-col items-start gap-3">
+                            {assignment.description}
+                            <div className="flex gap-2 items-center">
+                              {assignment.engineerId[0].color &&
+                              assignment.engineerId[0].code ? (
+                                <UserLogo
+                                  isSmall={true}
+                                  color={assignment.engineerId[0].color}
+                                  code={assignment.engineerId[0].code}
+                                />
+                              ) : (
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#515caa] rounded-full flex items-center justify-center text-white font-medium">
+                                  {assignment?.engineerId[0]?.name[0]}
+                                </div>
+                              )}
+
+                              <div>
+                                <h3 className="font-medium text-gray-900 text-sm sm:text-base">
+                                  {assignment?.engineerId[0]?.name}
+                                </h3>
+                                <p className="text-xs sm:text-sm text-gray-600">
+                                  {assignment.engineerId.department}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-medium text-gray-900 text-sm sm:text-base">
-                            {assignment.engineerName}
-                          </h3>
-                          <p className="text-xs sm:text-sm text-gray-600">
-                            {assignment.engineerDepartment}
-                          </p>
+                        <div className="relative"></div>
+                      </div>
+                      {/* Project Info */}
+                      <div className="mb-3 sm:mb-4">
+                        <div className="flex items-center justify-between mb-1 sm:mb-2">
+                          <h4 className="font-medium text-gray-900 text-sm sm:text-base">
+                            {assignment?.project?.name}
+                          </h4>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityBadge(
+                              assignment.priority
+                            )}`}
+                          >
+                            {assignment.priority}
+                          </span>
                         </div>
-                      </div>
-                      <div className="relative">
-                        <button className="p-2 hover:bg-gray-100 rounded-[12px] sm:rounded-[15px] transition-colors">
-                          <MoreHorizontal className="w-4 h-4 text-gray-400" />
-                        </button>
-                      </div>
-                    </div>
-                    {/* Project Info */}
-                    <div className="mb-3 sm:mb-4">
-                      <div className="flex items-center justify-between mb-1 sm:mb-2">
-                        <h4 className="font-medium text-gray-900 text-sm sm:text-base">
-                          {assignment.projectName}
-                        </h4>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">
+                          {assignment.role}
+                        </p>
                         <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityBadge(
-                            assignment.priority
+                          className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusBadge(
+                            assignment.status
                           )}`}
                         >
-                          {assignment.priority}
+                          {assignment.status}
                         </span>
                       </div>
-                      <p className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">
-                        {assignment.role}
-                      </p>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusBadge(
-                          assignment.status
-                        )}`}
-                      >
-                        {assignment.status}
-                      </span>
-                    </div>
-                    {/* Allocation */}
-                    <div className="mb-3 sm:mb-4">
-                      <div className="flex items-center justify-between mb-1 sm:mb-2">
-                        <span className="text-xs sm:text-sm text-gray-600">
-                          Allocation
-                        </span>
-                        <span className="text-xs sm:text-sm font-medium text-gray-900">
-                          {assignment.allocation ??
-                            assignment.allocationPercentage ??
-                            0}
-                          %
-                        </span>
+                      {/* Allocation */}
+                      <div className="mb-3 sm:mb-4">
+                        <div className="flex items-center justify-between mb-1 sm:mb-2">
+                          <span className="text-xs sm:text-sm text-gray-600">
+                            Allocation
+                          </span>
+                          <span className="text-xs sm:text-sm font-medium text-gray-900">
+                            {assignment.allocation ??
+                              assignment.allocationPercentage ??
+                              0}
+                            %
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="h-2 bg-[#515caa] rounded-full"
+                            style={{
+                              width: `${Math.min(
+                                100,
+                                assignment.allocation ??
+                                  assignment.allocationPercentage ??
+                                  0
+                              )}%`,
+                            }}
+                          />
+                        </div>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="h-2 bg-[#515caa] rounded-full"
-                          style={{
-                            width: `${Math.min(
-                              100,
-                              assignment.allocation ??
-                                assignment.allocationPercentage ??
-                                0
-                            )}%`,
-                          }}
-                        />
+                      {/* Timeline */}
+                      <div className="mb-3 sm:mb-4">
+                        <div className="flex items-center justify-between text-xs sm:text-sm text-gray-600">
+                          <span>
+                            Start:{" "}
+                            {assignment.startDate
+                              ? new Date(
+                                  assignment.startDate
+                                ).toLocaleDateString()
+                              : "-"}
+                          </span>
+                          <span>
+                            End:{" "}
+                            {assignment.endDate
+                              ? new Date(
+                                  assignment.endDate
+                                ).toLocaleDateString()
+                              : "-"}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    {/* Timeline */}
-                    <div className="mb-3 sm:mb-4">
-                      <div className="flex items-center justify-between text-xs sm:text-sm text-gray-600">
-                        <span>
-                          Start:{" "}
-                          {assignment.startDate
-                            ? new Date(
-                                assignment.startDate
-                              ).toLocaleDateString()
-                            : "-"}
-                        </span>
-                        <span>
-                          End:{" "}
-                          {assignment.endDate
-                            ? new Date(assignment.endDate).toLocaleDateString()
-                            : "-"}
-                        </span>
-                      </div>
-                    </div>
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 pt-3 sm:pt-4 border-t border-gray-200">
-                      <button className="flex-1 bg-[#515caa] hover:bg-[#454a94] text-white py-2 px-2 sm:px-4 rounded-[12px] sm:rounded-[15px] text-xs sm:text-sm font-medium transition-colors">
-                        Edit
-                      </button>
-                      <button className="p-2 hover:bg-gray-100 rounded-[12px] sm:rounded-[15px] transition-colors">
-                        <Eye className="w-4 h-4 text-gray-400" />
-                      </button>
-                      <button className="p-2 hover:bg-gray-100 rounded-[12px] sm:rounded-[15px] transition-colors">
-                        <Trash2 className="w-4" />
-                      </button>
+                      {/* Actions */}
+                      <div className="flex items-center gap-2 pt-3 sm:pt-4 border-t border-gray-200">
+                        <button className="flex-1 bg-[#515caa] hover:bg-[#454a94] text-white py-2 px-2 sm:px-4 rounded-[12px] sm:rounded-[15px] text-xs sm:text-sm font-medium transition-colors">
+                          Edit
+                        </button>
+
+                        <button className="p-2 hover:bg-gray-100 rounded-[12px] sm:rounded-[15px] transition-colors">
+                          <Trash2 className="w-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

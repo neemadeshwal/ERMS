@@ -333,9 +333,12 @@ export default function ProjectListPage() {
               Manage and track all your engineering projects
             </p>
           </div>
-          <Dialog>
-            <DialogTrigger>
-              <button className="bg-[#515caa] hover:bg-[#454a94] text-white px-6 py-2 rounded-[15px] font-medium transition-colors flex items-center gap-2">
+          <Dialog open={projectDialogOpen} onOpenChange={setProjectDialogOpen}>
+            <DialogTrigger asChild>
+              <button
+                onClick={() => setProjectDialogOpen(true)}
+                className="bg-[#515caa] hover:bg-[#454a94] text-white px-6 py-2 rounded-[15px] font-medium transition-colors flex items-center gap-2"
+              >
                 <Plus className="w-4 h-4" />
                 New Project
               </button>

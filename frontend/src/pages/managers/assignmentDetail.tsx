@@ -4,7 +4,6 @@ import {
   Edit,
   Eye,
   Trash2,
-  MoreHorizontal,
   Clock,
   Calendar,
   User,
@@ -195,9 +194,6 @@ const AssignmentDetailPage = () => {
                 onClick={handleDelete}
               >
                 <Trash2 className="w-5 h-5 text-red-600" />
-              </button>
-              <button className="p-2 hover:bg-gray-100 rounded-[15px] transition-colors">
-                <MoreHorizontal className="w-5 h-5 text-gray-400" />
               </button>
             </div>
           </div>

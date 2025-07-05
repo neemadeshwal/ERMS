@@ -183,7 +183,7 @@ export default function AssignmentForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-10 mx-auto overflow-auto max-h-[90%]"
+        className="space-y-10 mx-auto overflow-auto max-h-[70vh]"
       >
         {/* Engineer & Project */}
         <div className="flex flex-col md:flex-row justify-between gap-6">
@@ -277,13 +277,31 @@ export default function AssignmentForm({
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Role</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="e.g. Tech Lead"
-                    {...field}
-                    disabled={loading}
-                  />
-                </FormControl>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  disabled={loading}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="w-full bg-white">
+                    <SelectItem value="developer">Developer</SelectItem>
+                    <SelectItem value="senior-developer">
+                      Senior Developer
+                    </SelectItem>
+                    <SelectItem value="tech-lead">Tech Lead</SelectItem>
+                    <SelectItem value="architect">Architect</SelectItem>
+                    <SelectItem value="designer">Designer</SelectItem>
+                    <SelectItem value="tester">Tester</SelectItem>
+                    <SelectItem value="devops">DevOps</SelectItem>
+                    <SelectItem value="project-manager">
+                      Project Manager
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -377,41 +395,6 @@ export default function AssignmentForm({
             )}
           />
         </div>
-        <FormField
-          control={form.control}
-          name="role"
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormLabel>Role</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value}
-                disabled={loading}
-              >
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select role" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent className="w-full bg-white">
-                  <SelectItem value="developer">Developer</SelectItem>
-                  <SelectItem value="senior-developer">
-                    Senior Developer
-                  </SelectItem>
-                  <SelectItem value="tech-lead">Tech Lead</SelectItem>
-                  <SelectItem value="architect">Architect</SelectItem>
-                  <SelectItem value="designer">Designer</SelectItem>
-                  <SelectItem value="tester">Tester</SelectItem>
-                  <SelectItem value="devops">DevOps</SelectItem>
-                  <SelectItem value="project-manager">
-                    Project Manager
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         {/* Description */}
         <FormField

@@ -105,7 +105,6 @@ const ManagerSidebar = () => {
             <DrawerHeader className="text-left">
               <DrawerTitle className="sr-only">Navigation Menu</DrawerTitle>
               <div className="flex items-center justify-between">
-                <span className="text-lg font-semibold">Navigation</span>
                 <button
                   onClick={() => setIsDrawerOpen(false)}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
