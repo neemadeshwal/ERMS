@@ -28,23 +28,54 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const setCookie = (name: string, value: string, days = 7) => {
   const expires = new Date();
   expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
-  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;secure;samesite=strict`;
+
+  // Enhanced cookie settings for production
+  const cookieSettings = [
+    `${name}=${value}`,
+    `expires=${expires.toUTCString()}`,
+    `path=/`,
+    `SameSite=Strict`,
+  ];
+
+  // Only add Secure flag in production (HTTPS)
+  if (window.location.protocol === "https:") {
+    cookieSettings.push("Secure");
+  }
+
+  document.cookie = cookieSettings.join(";");
 };
 
 const getCookie = (name: string): string | null => {
-  const nameEQ = name + "=";
-  const ca = document.cookie.split(";");
-  for (let i = 0; i < ca.length; i++) {
-    let c = ca[i].trim();
-    if (c.startsWith(nameEQ)) {
-      return c.substring(nameEQ.length);
+  try {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(";");
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i].trim();
+      if (c.startsWith(nameEQ)) {
+        return c.substring(nameEQ.length);
+      }
     }
+    return null;
+  } catch (error) {
+    console.error("Error reading cookie:", error);
+    return null;
   }
-  return null;
 };
 
 const deleteCookie = (name: string) => {
-  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+  const cookieSettings = [
+    `${name}=`,
+    `expires=Thu, 01 Jan 1970 00:00:00 UTC`,
+    `path=/`,
+    `SameSite=Strict`,
+  ];
+
+  // Only add Secure flag in production (HTTPS)
+  if (window.location.protocol === "https:") {
+    cookieSettings.push("Secure");
+  }
+
+  document.cookie = cookieSettings.join(";");
 };
 
 export const AuthProvider = (props: AuthProviderProps) => {
@@ -67,6 +98,7 @@ export const AuthProvider = (props: AuthProviderProps) => {
           setCookie("userRole", data.user.role);
         } else {
           // Token is invalid, clear everything
+          console.warn("Token validation failed, logging out");
           logout();
         }
       } catch (err) {
@@ -85,20 +117,36 @@ export const AuthProvider = (props: AuthProviderProps) => {
 
   // Initialize auth state from cookies on app start
   useEffect(() => {
-    const storedToken = getCookie("authToken");
-    const storedRole = getCookie("userRole");
+    try {
+      const storedToken = getCookie("authToken");
+      const storedRole = getCookie("userRole");
 
-    if (storedToken && storedRole) {
-      setToken(storedToken);
-      setRole(storedRole);
-    } else {
-      // Clear any partial auth state
+      console.log("Initializing auth state:", {
+        hasToken: !!storedToken,
+        hasRole: !!storedRole,
+        environment: process.env.NODE_ENV,
+      });
+
+      if (storedToken && storedRole) {
+        setToken(storedToken);
+        setRole(storedRole);
+      } else {
+        // Clear any partial auth state
+        setToken(null);
+        setRole(null);
+        setUser(null);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Error initializing auth state:", error);
+      // Clear everything on error
       setToken(null);
       setRole(null);
       setUser(null);
       setIsLoading(false);
+    } finally {
+      setIsInitialized(true);
     }
-    setIsInitialized(true);
   }, []);
 
   // Refresh user data when token changes and after initialization
@@ -110,13 +158,26 @@ export const AuthProvider = (props: AuthProviderProps) => {
   }, [token, isInitialized]);
 
   const login = (newToken: string, userRole: string) => {
-    setToken(newToken);
-    setRole(userRole);
-    setCookie("authToken", newToken, 7); // Set for 7 days
-    setCookie("userRole", userRole, 7); // Set for 7 days
+    try {
+      console.log("Logging in user:", {
+        role: userRole,
+        environment: process.env.NODE_ENV,
+      });
+
+      setToken(newToken);
+      setRole(userRole);
+      setCookie("authToken", newToken, 7); // Set for 7 days
+      setCookie("userRole", userRole, 7); // Set for 7 days
+
+      console.log("Login successful, cookies set");
+    } catch (error) {
+      console.error("Error during login:", error);
+      throw error; // Re-throw to handle in component
+    }
   };
 
   const logout = () => {
+    console.log("Logging out user");
     setToken(null);
     setRole(null);
     setUser(null);

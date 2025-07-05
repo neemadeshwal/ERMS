@@ -24,7 +24,7 @@ import { CreateNewUser } from "@/actions/auth/auth-action";
 import { useRegisterStore } from "@/zustand/registerStore";
 import { useAuth } from "@/context/authContext";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // Sample skills
 const skillsList = [
@@ -50,6 +50,7 @@ const RegisterEngineer = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { basicInfo, clear } = useRegisterStore();
 
   const form = useForm<z.infer<typeof registerEngineerSchema>>({
     resolver: zodResolver(registerEngineerSchema),
@@ -61,13 +62,27 @@ const RegisterEngineer = () => {
     },
   });
 
+  useEffect(() => {
+    console.log("Basic info in store:", basicInfo);
+
+    // If no basic info, redirect back to initial registration
+    if (!basicInfo) {
+      console.error("No basic info found, redirecting to initial registration");
+      setError(
+        "Session expired. Please complete the registration from the beginning."
+      );
+      setTimeout(() => {
+        navigate("/register");
+      }, 2000);
+    }
+  }, [basicInfo, navigate]);
+
   const onSubmit = async (data: z.infer<typeof registerEngineerSchema>) => {
     setIsLoading(true);
     setError(null);
 
     try {
       console.log("Extended Profile:", data);
-      const basicInfo = useRegisterStore.getState().basicInfo;
 
       if (!basicInfo) {
         setError("Basic info missing. Please complete step 1.");
@@ -92,24 +107,55 @@ const RegisterEngineer = () => {
         const userRole =
           createdUser.user?.role || createdUser.user?.roles || "engineer";
 
-        login(createdUser.token, userRole);
-        navigate("/engineer");
+        try {
+          login(createdUser.token, userRole);
+
+          // Clear the registration store after successful registration
+          clear();
+
+          // Add a small delay before navigation to ensure login completes
+          setTimeout(() => {
+            navigate("/engineer");
+          }, 100);
+        } catch (loginError) {
+          console.error("Login failed:", loginError);
+          setError(
+            "Account created but login failed. Please try logging in manually."
+          );
+        }
       } else {
-        // Handle API error
+        // Handle API error with more detailed logging
+        console.error("Full API response:", createdUser);
         const errorMessage =
           createdUser?.message ||
           createdUser?.error ||
           "Failed to create account. Please try again.";
         setError(errorMessage);
-        console.error("Account creation failed:", createdUser);
       }
     } catch (error) {
       console.error("Registration error:", error);
-      setError("An unexpected error occurred. Please try again.");
+      // More detailed error logging
+      if (error instanceof Error) {
+        setError(`Registration failed: ${error.message}`);
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Show loading if basic info is being checked
+  if (!basicInfo) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading registration data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="">

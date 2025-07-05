@@ -62,19 +62,24 @@ const InitialRegister = ({ setIsEngineer }: { setIsEngineer: any }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { login } = useAuth();
+  const { setBasicInfo } = useRegisterStore();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     setError(null);
+    console.log("Submitting values:", values);
 
     try {
-      console.log("Submitting values:", values);
-
       if (values.role === "engineer") {
         // Store basic info and continue to engineer registration
-        useRegisterStore.getState().setBasicInfo(values);
-        setIsEngineer(true);
-        setIsLoading(false);
+        // Use the hook instead of getState() for better reliability
+        setBasicInfo(values);
+
+        // Add a small delay to ensure state is set
+        setTimeout(() => {
+          setIsEngineer(true);
+          setIsLoading(false);
+        }, 100);
       } else {
         // Create manager account directly
         const createdUser = await CreateNewUser(values);
@@ -86,23 +91,42 @@ const InitialRegister = ({ setIsEngineer }: { setIsEngineer: any }) => {
           const userRole =
             createdUser.user?.role || createdUser.user?.roles || values.role;
 
-          login(createdUser.token, userRole);
-          navigate("/manager");
+          // Add error handling for login
+          try {
+            login(createdUser.token, userRole);
+
+            // Add a small delay before navigation to ensure login completes
+            setTimeout(() => {
+              navigate("/manager");
+            }, 100);
+          } catch (loginError) {
+            console.error("Login failed:", loginError);
+            setError(
+              "Account created but login failed. Please try logging in manually."
+            );
+          }
         } else {
-          // Handle API error
+          // Handle API error with more detailed logging
+          console.error("Full API response:", createdUser);
           const errorMessage =
             createdUser?.message ||
             createdUser?.error ||
             "Failed to create account. Please try again.";
           setError(errorMessage);
-          console.error("Account creation failed:", createdUser);
         }
       }
     } catch (error) {
       console.error("Registration error:", error);
-      setError("An unexpected error occurred. Please try again.");
+      // More detailed error logging
+      if (error instanceof Error) {
+        setError(`Registration failed: ${error.message}`);
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
     } finally {
-      setIsLoading(false);
+      if (values.role !== "engineer") {
+        setIsLoading(false);
+      }
     }
   }
 
