@@ -23,6 +23,9 @@ import { LoginUser } from "@/actions/auth/auth-action";
 import { getDashboardRoute, useAuth } from "@/context/authContext";
 import { Navigate, useNavigate } from "react-router-dom";
 import Loader from "@/features/loader";
+import { toast } from "sonner";
+import { useState } from "react";
+import { Eye, EyeClosed, EyeOff } from "lucide-react";
 
 const formSchema = z.object({
   email: z
@@ -51,13 +54,19 @@ const Login = () => {
     },
   });
   const { login, isLoading, role, isAuthenticated } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
+    setLoading(true);
     try {
       const loginUser = await LoginUser(values);
-      if (loginUser.success && loginUser.token) {
+      if (!loginUser.success) {
+        toast.error(loginUser.message);
+      }
+      if (loginUser.token) {
         login(loginUser.token, loginUser.role);
 
         if (loginUser.role === "manager") {
@@ -66,8 +75,14 @@ const Login = () => {
           navigate("/engineer");
         }
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+      toast.error("An error occured .Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
+
   if (isLoading) {
     return (
       <div className="w-full h-full flex items-center justify-center">
@@ -115,11 +130,24 @@ const Login = () => {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input
-                        className="rounded-[8px] py-5 placeholder:text-gray-500"
-                        placeholder="Enter your password"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          className="rounded-[8px] py-5 placeholder:text-gray-500"
+                          placeholder="Enter your password"
+                          type={showPassword ? "text" : "password"}
+                          {...field}
+                        />
+                        <div
+                          className="absolute right-4 top-[10px]"
+                          onClick={() => setShowPassword((prevVal) => !prevVal)}
+                        >
+                          {showPassword ? (
+                            <EyeOff size={20} strokeWidth={1} />
+                          ) : (
+                            <Eye size={20} strokeWidth={1} />
+                          )}
+                        </div>
+                      </div>
                     </FormControl>
 
                     <FormMessage className="text-[12px] mt-0 text-red-500" />
@@ -160,10 +188,11 @@ const Login = () => {
                 )}
               />
               <Button
+                disabled={loading}
                 className="bg-[#5c66a7] hover:bg-[#525b95] rounded-[8px] py-5  cursor-pointer w-full text-white"
                 type="submit"
               >
-                Submit
+                {loading ? <Loader /> : "Submit"}
               </Button>
             </form>
           </Form>

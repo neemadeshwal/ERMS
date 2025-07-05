@@ -24,6 +24,9 @@ import { useState } from "react";
 import { CreateNewUser } from "@/actions/auth/auth-action";
 import { Navigate, useNavigate } from "react-router-dom";
 import { getDashboardRoute, useAuth } from "@/context/authContext";
+import Loader from "@/features/loader";
+import { toast } from "sonner";
+import { Eye, EyeClosed, EyeOff } from "lucide-react";
 
 const formSchema = z.object({
   name: z
@@ -59,10 +62,11 @@ const InitialRegister = ({ setIsEngineer }: { setIsEngineer: any }) => {
   });
   const navigate = useNavigate();
   const [isManager, setIsManager] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { login, isAuthenticated, role } = useAuth();
   const { setBasicInfo } = useRegisterStore();
+  const [showPassword, setShowPassword] = useState(false);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -71,48 +75,35 @@ const InitialRegister = ({ setIsEngineer }: { setIsEngineer: any }) => {
 
     try {
       if (values.role === "engineer") {
-        // Store basic info and continue to engineer registration
-        // Use the hook instead of getState() for better reliability
         setBasicInfo(values);
 
-        // Add a small delay to ensure state is set
         setTimeout(() => {
           setIsEngineer(true);
           setIsLoading(false);
         }, 100);
       } else {
-        // Create manager account directly
         const createdUser = await CreateNewUser(values);
 
         console.log("CreateNewUser response:", createdUser);
 
         if (createdUser?.success && createdUser?.token) {
-          // Use consistent role format - get role from user object
           const userRole =
             createdUser.user?.role || createdUser.user?.roles || values.role;
 
-          // Add error handling for login
           try {
             login(createdUser.token, userRole);
 
-            // Add a small delay before navigation to ensure login completes
             setTimeout(() => {
               navigate("/manager");
             }, 100);
           } catch (loginError) {
             console.error("Login failed:", loginError);
-            setError(
-              "Account created but login failed. Please try logging in manually."
-            );
+            toast.error("An error occured.");
           }
         } else {
-          // Handle API error with more detailed logging
-          console.error("Full API response:", createdUser);
-          const errorMessage =
-            createdUser?.message ||
-            createdUser?.error ||
-            "Failed to create account. Please try again.";
-          setError(errorMessage);
+          const errorMessage = createdUser?.message;
+
+          toast.error(errorMessage ?? "An error occured.Please try again.");
         }
       }
     } catch (error) {
@@ -132,6 +123,7 @@ const InitialRegister = ({ setIsEngineer }: { setIsEngineer: any }) => {
   if (isAuthenticated) {
     return <Navigate to={getDashboardRoute(role)} replace />;
   }
+
   return (
     <div className="">
       <Form {...form}>
@@ -184,12 +176,24 @@ const InitialRegister = ({ setIsEngineer }: { setIsEngineer: any }) => {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input
-                    className="rounded-[8px] py-5 placeholder:text-gray-500"
-                    placeholder="Enter your password"
-                    type="password"
-                    {...field}
-                  />
+                  <div className="relative">
+                    <Input
+                      className="rounded-[8px] py-5 placeholder:text-gray-500"
+                      placeholder="Enter your password"
+                      type={showPassword ? "text" : "password"}
+                      {...field}
+                    />
+                    <div
+                      className="absolute right-4 top-[10px]"
+                      onClick={() => setShowPassword((prevVal) => !prevVal)}
+                    >
+                      {showPassword ? (
+                        <EyeOff strokeWidth={1} size={20} />
+                      ) : (
+                        <Eye strokeWidth={1} size={20} />
+                      )}
+                    </div>
+                  </div>
                 </FormControl>
                 <FormMessage className="text-[12px] mt-0 text-red-500" />
               </FormItem>
@@ -236,9 +240,9 @@ const InitialRegister = ({ setIsEngineer }: { setIsEngineer: any }) => {
           <Button
             className="bg-[#5c66a7] hover:bg-[#525b95] rounded-[8px] py-5 cursor-pointer w-full text-white disabled:opacity-50"
             type="submit"
-            disabled={isLoading}
+            disabled={loading}
           >
-            {isLoading ? "Loading..." : isManager ? "Submit" : "Continue"}
+            {loading ? <Loader /> : isManager ? "Submit" : "Continue"}
           </Button>
         </form>
       </Form>

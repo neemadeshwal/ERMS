@@ -25,6 +25,8 @@ import { useRegisterStore } from "@/zustand/registerStore";
 import { getDashboardRoute, useAuth } from "@/context/authContext";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Loader } from "lucide-react";
 
 // Sample skills
 const skillsList = [
@@ -48,9 +50,9 @@ const registerEngineerSchema = z.object({
 const RegisterEngineer = () => {
   const { login, role, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { basicInfo, clear } = useRegisterStore();
+  const [loading, setLoading] = useState(false);
 
   const form = useForm<z.infer<typeof registerEngineerSchema>>({
     resolver: zodResolver(registerEngineerSchema),
@@ -63,14 +65,10 @@ const RegisterEngineer = () => {
   });
 
   useEffect(() => {
-    console.log("Basic info in store:", basicInfo);
-
     // If no basic info, redirect back to initial registration
     if (!basicInfo) {
       console.error("No basic info found, redirecting to initial registration");
-      setError(
-        "Session expired. Please complete the registration from the beginning."
-      );
+      toast.error("No basic info found");
       setTimeout(() => {
         navigate("/register");
       }, 2000);
@@ -78,15 +76,13 @@ const RegisterEngineer = () => {
   }, [basicInfo, navigate]);
 
   const onSubmit = async (data: z.infer<typeof registerEngineerSchema>) => {
-    setIsLoading(true);
-    setError(null);
+    setLoading(true);
 
     try {
       console.log("Extended Profile:", data);
 
       if (!basicInfo) {
-        setError("Basic info missing. Please complete step 1.");
-        setIsLoading(false);
+        setLoading(false);
         return;
       }
 
@@ -119,29 +115,26 @@ const RegisterEngineer = () => {
           }, 100);
         } catch (loginError) {
           console.error("Login failed:", loginError);
-          setError(
-            "Account created but login failed. Please try logging in manually."
-          );
+          toast.error("an error occured");
         }
       } else {
-        // Handle API error with more detailed logging
         console.error("Full API response:", createdUser);
         const errorMessage =
           createdUser?.message ||
           createdUser?.error ||
           "Failed to create account. Please try again.";
-        setError(errorMessage);
+        toast.error(errorMessage);
       }
     } catch (error) {
       console.error("Registration error:", error);
       // More detailed error logging
       if (error instanceof Error) {
-        setError(`Registration failed: ${error.message}`);
+        toast.error(error.message);
       } else {
-        setError("An unexpected error occurred. Please try again.");
+        toast.error("An unexpected error occurred. Please try again");
       }
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -298,9 +291,9 @@ const RegisterEngineer = () => {
           <Button
             className="bg-[#5c66a7] hover:bg-[#525b95] rounded-[8px] py-5 cursor-pointer w-full text-white disabled:opacity-50"
             type="submit"
-            disabled={isLoading}
+            disabled={loading}
           >
-            {isLoading ? "Creating Account..." : "Submit"}
+            {loading ? <Loader /> : "Submit"}
           </Button>
         </form>
       </Form>

@@ -6,7 +6,6 @@ import emrsLogo from "../../assets/erms.png";
 
 const Register = () => {
   const [isEngineer, setIsEngineer] = useState(false);
-
   return (
     <div className="h-screen max-width">
       <div className="flex justify-between items-center h-full w-full">
@@ -31,7 +30,6 @@ const Register = () => {
           </a>
         </div>
 
-        {/* Right side image – only visible on screens >1048px (md/lg and above) */}
         <div className="hidden lg:ml-20 xl:ml-32 lg:flex w-[60%] justify-center pt-20 pr-[-20rem]">
           <img
             src={registerImage}
