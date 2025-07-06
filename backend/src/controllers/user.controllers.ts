@@ -56,7 +56,7 @@ export const newUser = asyncErrorHandler(
     const colorCode = getRandomDarkHexColor();
 
     const userData = {
-      email,
+      email: email.toLowerCase(),
       code,
       password: hashedPassword,
       name,
@@ -101,8 +101,10 @@ export const loginUser = asyncErrorHandler(
       return next(
         new ErrorHandler("Please provide required credentials.", 400)
       );
-
-    const userExist = await User.findOne({ email });
+    const userExist = await User.findOne({
+      email: { $regex: `^${email}$`, $options: "i" },
+      role: role,
+    });
 
     if (!userExist) {
       return next(
