@@ -57,7 +57,7 @@ export const projectSchema = z.object({
   endDate: z.string().min(1, "End date is required"),
   requiredSkills: z.array(z.string()).min(1, "At least one skill is required"),
   teamSize: z.string().min(1, "Team size must be at least 1"),
-  status: z.enum(["on-hold", "active", "completed"]),
+  status: z.enum(["on-hold", "active", "completed", "planning"]),
   priority: z.enum(["high", "medium", "low"]),
 });
 
@@ -307,6 +307,7 @@ export default function ProjectForm({
                     <SelectItem value="on-hold">Onhold</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="planning">Planning</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage className="text-[12px] mt-0 text-red-500" />

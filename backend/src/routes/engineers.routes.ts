@@ -2,12 +2,14 @@ import express from "express";
 import {
   getAllEngineer,
   getSingleEngineer,
+  editEngineer,
 } from "../controllers/engineers.controllers";
+import { authenticated } from "../middleware/auth.middleware";
 
 const EngineerRouter = express.Router();
 
-EngineerRouter.get("/", getAllEngineer);
-EngineerRouter.get("/:id", getSingleEngineer);
-// EngineerRouter.get("/:id/capacity", capacity);
+EngineerRouter.get("/", authenticated, getAllEngineer);
+EngineerRouter.get("/:id", authenticated, getSingleEngineer);
+EngineerRouter.put("/edit", authenticated, editEngineer);
 
 export default EngineerRouter;

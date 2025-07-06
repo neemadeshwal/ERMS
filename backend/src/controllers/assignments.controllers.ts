@@ -32,6 +32,11 @@ function validateAssignment(body: any): string[] {
 export const createAssignment = asyncErrorHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     // Map 'allocation' to 'allocationPercentage' if present
+    const user = req.user;
+
+    if (!user) {
+      return next(new ErrorHandler("Unauthorized request", 401));
+    }
     if (req.body.allocation && !req.body.allocationPercentage) {
       req.body.allocationPercentage = req.body.allocation;
     }
@@ -82,9 +87,15 @@ export const createAssignment = asyncErrorHandler(
 // READ All Assignments
 export const getAllAssignments = asyncErrorHandler(
   async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    if (!user) {
+      return next(new ErrorHandler("Unauthorized request", 401));
+    }
     const assignments = await Assignment.find()
       .populate("engineerId")
-      .populate("projectId");
+      .populate("projectId")
+      .populate("assignedBy");
     res.status(200).json({
       success: true,
       assignments,
@@ -96,7 +107,8 @@ export const getSingleAssignment = asyncErrorHandler(
     const id = req.params.id;
     const assignment = await Assignment.findOne({ _id: id })
       .populate("projectId")
-      .populate("engineerId");
+      .populate("engineerId")
+      .populate("assignedBy");
     res.status(200).json({
       success: true,
       assignment,
@@ -107,6 +119,11 @@ export const getSingleAssignment = asyncErrorHandler(
 // UPDATE Assignment by ID
 export const updateAssignment = asyncErrorHandler(
   async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    if (!user) {
+      return next(new ErrorHandler("Unauthorized request", 401));
+    }
     const { id } = req.params;
     const errors = validateAssignment(req.body);
     if (errors.length) {
@@ -158,6 +175,11 @@ export const updateAssignment = asyncErrorHandler(
 // DELETE Assignment by ID
 export const deleteAssignment = asyncErrorHandler(
   async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    if (!user) {
+      return next(new ErrorHandler("Unauthorized request", 401));
+    }
     const { id } = req.params;
     const deleted = await Assignment.findByIdAndDelete(id);
     if (!deleted) {

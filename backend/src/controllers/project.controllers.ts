@@ -21,6 +21,11 @@ function validateProject(body: any) {
 // CREATE Project
 export const createProject = asyncErrorHandler(
   async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    if (!user) {
+      return next(new ErrorHandler("Unauthorized request", 401));
+    }
     const errors = validateProject(req.body);
     if (errors.length) {
       return next(new ErrorHandler(errors.join(", "), 400));
@@ -37,7 +42,14 @@ export const createProject = asyncErrorHandler(
 // READ All Projects
 export const getProjects = asyncErrorHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const projects = await Project.find();
+    const user = req.user;
+
+    if (!user) {
+      return next(new ErrorHandler("Unauthorized request", 401));
+    }
+    const projects = await Project.find()
+      .populate("managerId")
+      .populate("teamMembers");
     res.status(200).json({
       success: true,
       projects,
@@ -47,6 +59,11 @@ export const getProjects = asyncErrorHandler(
 
 export const getSingleProjects = asyncErrorHandler(
   async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    if (!user) {
+      return next(new ErrorHandler("Unauthorized request", 401));
+    }
     const id = req.params.id;
     const project = await Project.findOne({ _id: id }).populate("managerId");
     res.status(200).json({
@@ -59,6 +76,11 @@ export const getSingleProjects = asyncErrorHandler(
 // UPDATE Project by ID
 export const updateProject = asyncErrorHandler(
   async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    if (!user) {
+      return next(new ErrorHandler("Unauthorized request", 401));
+    }
     const { id } = req.params;
     const errors = validateProject(req.body);
     if (errors.length) {
@@ -81,6 +103,11 @@ export const updateProject = asyncErrorHandler(
 // DELETE Project by ID
 export const deleteProject = asyncErrorHandler(
   async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    if (!user) {
+      return next(new ErrorHandler("Unauthorized request", 401));
+    }
     const { id } = req.params;
     const deleted = await Project.findByIdAndDelete(id);
     if (!deleted) {

@@ -129,22 +129,8 @@ const EngineerCapacity = () => {
             Monitor workload distribution and availability
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 sm:px-4 py-2 rounded-[20px] font-medium transition-colors flex items-center gap-2 text-xs sm:text-sm">
-            <Filter className="w-4 h-4" />
-            Filter
-          </button>
-          <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 sm:px-4 py-2 rounded-[20px] font-medium transition-colors flex items-center gap-2 text-xs sm:text-sm">
-            <Download className="w-4 h-4" />
-            Export
-          </button>
-          <button className="bg-[#515caa] hover:bg-[#454a94] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-[20px] font-medium transition-colors flex items-center gap-2 text-xs sm:text-sm">
-            <Settings className="w-5 h-5" />
-            Optimize
-          </button>
-        </div>
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3"></div>
       </div>
-
       {/* Status Alert */}
       <div
         className={`p-4 rounded-[20px] border-l-4 ${
@@ -204,7 +190,6 @@ const EngineerCapacity = () => {
           </div>
         </div>
       </div>
-
       {/* Summary Cards */}
       <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
         <div className="bg-white p-4 sm:p-6 rounded-[20px] shadow-sm border border-gray-200">
@@ -271,7 +256,6 @@ const EngineerCapacity = () => {
           </div>
         </div>
       </div>
-
       {/* Capacity Visualization */}
       <div className="bg-white rounded-[20px] shadow-sm border border-gray-200">
         <div className="p-4 sm:p-6 border-b border-gray-200">
@@ -469,93 +453,6 @@ const EngineerCapacity = () => {
                 </div>
               </div>
             )}
-          </div>
-        </div>
-      </div>
-
-      {/* Upcoming Projects Impact */}
-      <div className="bg-white rounded-[20px] shadow-sm border border-gray-200">
-        <div className="p-4 sm:p-6 border-b border-gray-200">
-          <h2 className="text-lg sm:text-xl font-bold text-gray-900">
-            Upcoming Projects Impact
-          </h2>
-          <p className="text-gray-600 mt-1 text-sm sm:text-base">
-            How future assignments will affect your capacity
-          </p>
-        </div>
-
-        <div className="p-4 sm:p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            {upcomingAssignments.map((assignment) => (
-              <div
-                key={assignment._id || assignment.id}
-                className="bg-gradient-to-r from-orange-50 to-red-50 rounded-[20px] p-4 sm:p-6 border border-orange-100"
-              >
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 gap-2">
-                  <div className="flex-1">
-                    <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
-                      {assignment.project?.name}
-                    </h4>
-                    <p className="text-gray-600 mb-3 text-sm">
-                      {assignment.project?.description}
-                    </p>
-
-                    <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-500">
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        <span>{assignment.role}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4" />
-                        <span>
-                          {assignment.hoursPerWeek
-                            ? `${assignment.hoursPerWeek} hrs/week`
-                            : ""}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="text-center mt-2 md:mt-0">
-                    <div className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs sm:text-sm font-medium mb-2">
-                      {assignment.daysUntilStart} days
-                    </div>
-                    <div className="text-xl sm:text-2xl font-bold text-orange-600">
-                      {Math.min(100, assignment.allocationPercentage)}%
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <div className="flex justify-between text-xs sm:text-sm text-gray-600 mb-2">
-                    <span>Impact on Capacity</span>
-                    <span className="font-medium">
-                      +{Math.min(100, assignment.allocationPercentage)}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
-                    <div
-                      className="bg-gradient-to-r from-orange-400 to-red-400 h-1.5 sm:h-2 rounded-full transition-all duration-300"
-                      style={{
-                        width: `${Math.min(
-                          100,
-                          assignment.allocationPercentage
-                        )}%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-4 border-t border-orange-200">
-                  <button className="bg-orange-600 hover:bg-orange-700 text-white px-3 sm:px-4 py-2 rounded-[20px] text-xs sm:text-sm font-medium transition-colors">
-                    View Details
-                  </button>
-                  <button className="bg-white hover:bg-gray-50 text-gray-700 px-3 sm:px-4 py-2 rounded-[20px] text-xs sm:text-sm font-medium transition-colors border border-gray-300">
-                    Negotiate Terms
-                  </button>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </div>

@@ -6,14 +6,15 @@ import {
   getSingleAssignment,
   updateAssignment,
 } from "../controllers/assignments.controllers";
+import { authenticated } from "../middleware/auth.middleware";
 
 const AssignmentRouter = express.Router();
 
-AssignmentRouter.get("/", getAllAssignments);
-AssignmentRouter.post("/", createAssignment),
-  AssignmentRouter.get("/:id", getSingleAssignment),
-  AssignmentRouter.put("/:id", updateAssignment);
+AssignmentRouter.get("/", authenticated, getAllAssignments);
+AssignmentRouter.post("/", authenticated, createAssignment),
+  AssignmentRouter.get("/:id", authenticated, getSingleAssignment),
+  AssignmentRouter.put("/:id", authenticated, updateAssignment);
 
-AssignmentRouter.delete("/:id", deleteAssignment);
+AssignmentRouter.delete("/:id", authenticated, deleteAssignment);
 
 export default AssignmentRouter;

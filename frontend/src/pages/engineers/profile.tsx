@@ -23,6 +23,8 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/context/authContext";
 import UserLogo from "@/features/userLogo";
+import { formatDate } from "@/formatData";
+import { updateProfile } from "@/actions/engineers/engineer-action";
 
 // Zod Schema Definitions
 const UserSchema = z.object({
@@ -35,21 +37,22 @@ const UserSchema = z.object({
   }),
   department: z.string().optional(),
   team: z.string().optional(),
-  seniority: z.enum(["senior", "mid", "junior", "intern", "staff"]).optional(),
+  seniority: z.string().optional(),
   yearsOfExperience: z.number().min(0).max(50).optional(),
   location: z.string().optional(),
   timezone: z.string().optional(),
   employmentType: z.enum(["fullTime", "partTime"]).optional(),
   workType: z.enum(["remote", "onsite", "hybrid"]).optional(),
-  status: z.enum(["active", "inactive", "on-leave", "terminated"]).optional(),
+  status: z.string().optional(),
   hireDate: z.string().optional(),
   availableFrom: z.string().optional(),
-  maxCapacity: z.number().min(0).max(100).optional(),
-  currentCapacity: z.number().min(0).max(100).optional(),
+  maxCapacity: z.coerce.number().optional(),
+  currentCapacity: z.coerce.number(),
+
   skills: z.array(z.string()).optional(),
   preferredProjectTypes: z.array(z.string()).optional(),
-  color: z.string().optional(),
-  code: z.string().optional(),
+  color: z.string(),
+  code: z.string(),
 });
 
 // TypeScript Types
@@ -96,11 +99,9 @@ const ROLE_OPTIONS = [
 ];
 
 const SENIORITY_OPTIONS = [
-  { value: "intern", label: "Intern" },
+  { value: "senior", label: "Senior" },
   { value: "junior", label: "Junior" },
   { value: "mid", label: "Mid" },
-  { value: "senior", label: "Senior" },
-  { value: "staff", label: "Staff" },
 ];
 
 const EMPLOYMENT_TYPE_OPTIONS = [
@@ -112,13 +113,6 @@ const WORK_TYPE_OPTIONS = [
   { value: "remote", label: "Remote" },
   { value: "onsite", label: "Onsite" },
   { value: "hybrid", label: "Hybrid" },
-];
-
-const STATUS_OPTIONS = [
-  { value: "active", label: "Active" },
-  { value: "inactive", label: "Inactive" },
-  { value: "on-leave", label: "On Leave" },
-  { value: "terminated", label: "Terminated" },
 ];
 
 // Enhanced Input Component
@@ -308,7 +302,7 @@ const CapacityBar: React.FC<{ current: number; max: number }> = ({
   current,
   max,
 }) => {
-  const percentage = max > 0 ? (current / max) * 100 : 0;
+  const percentage = max > 0 ? Math.min((current / max) * 100, 100) : 0;
   const getColor = (percentage: number) => {
     if (percentage >= 90) return "bg-red-500";
     if (percentage >= 70) return "bg-yellow-500";
@@ -317,7 +311,7 @@ const CapacityBar: React.FC<{ current: number; max: number }> = ({
 
   return (
     <div className="space-y-2">
-      <div className="flex justify-between text-xs text-gray-500">
+      <div className="flex justify-between text-xs text-gray-100">
         <span>
           Capacity: {current}/{max}
         </span>
@@ -335,7 +329,7 @@ const CapacityBar: React.FC<{ current: number; max: number }> = ({
 
 // Main Component
 const EngineerProfile: React.FC = () => {
-  const { user: authUser } = useAuth();
+  const { user: authUser, token } = useAuth();
   const [formData, setFormData] = useState<ProfileUser | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
@@ -347,8 +341,11 @@ const EngineerProfile: React.FC = () => {
 
   useEffect(() => {
     if (authUser) {
-      const parsed = UserSchema.safeParse(authUser);
-      setFormData(parsed.success ? parsed.data : null);
+      setFormData({
+        ...authUser,
+        currentCapacity: Number(authUser.currentCapacity),
+        maxCapacity: Number(authUser.maxCapacity),
+      });
     }
   }, [authUser]);
 
@@ -397,17 +394,31 @@ const EngineerProfile: React.FC = () => {
 
   const handleSave = async () => {
     if (!formData) return;
+    console.log("saving form");
+
+    // Validate form
     const errors = validateForm(formData);
+    console.log(errors);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
+    console.log("error passed");
+
     setSaveStatus("saving");
+
+    if (!authUser || !token) return;
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setSaveStatus("success");
-      setIsEditing(false);
-      setValidationErrors({});
+      const updated = await updateProfile(formData, token);
+
+      if (updated && updated.success) {
+        setSaveStatus("success");
+        setIsEditing(false);
+        setValidationErrors({});
+        setFormData(updated.user || formData);
+      } else {
+        setSaveStatus("error");
+      }
       setTimeout(() => setSaveStatus("idle"), 3000);
     } catch (error) {
       setSaveStatus("error");
@@ -480,8 +491,8 @@ const EngineerProfile: React.FC = () => {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-xs sm:text-sm text-white/80">
               <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4" />
-                <span>{formData.location || "—"}</span>
+                <Award className="w-4 h-4" />
+                <span>{formData.seniority || "—"}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4" />
@@ -490,14 +501,14 @@ const EngineerProfile: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
                 <span>
-                  {formData.hireDate
-                    ? `Joined ${new Date(formData.hireDate).getFullYear()}`
+                  {formData.availableFrom
+                    ? `Joined ${formatDate(formData.availableFrom)}`
                     : "—"}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4" />
-                <span>{formData.yearsOfExperience || 0} years exp</span>
+                <span>{formData.employmentType}</span>
               </div>
             </div>
           </div>
@@ -505,8 +516,8 @@ const EngineerProfile: React.FC = () => {
         {/* Capacity Bar */}
         <div className="mb-4 md:mb-6">
           <CapacityBar
-            current={formData.currentCapacity || 0}
-            max={formData.maxCapacity || 100}
+            current={Number(formData.currentCapacity) || 0}
+            max={Number(formData.maxCapacity) || 100}
           />
         </div>
         {/* Action Buttons */}
@@ -667,12 +678,11 @@ const EngineerProfile: React.FC = () => {
             icon={<Building className="w-4 h-4" />}
             placeholder="Select work type"
           />
-          <FormSelect
+          <FormInput
             label="Status"
             value={formData.status || ""}
+            type="string"
             onChange={(value) => handleChange("status", value)}
-            options={STATUS_OPTIONS}
-            disabled={!isEditing}
             error={validationErrors.status}
             icon={<Target className="w-4 h-4" />}
             placeholder="Select status"
@@ -699,29 +709,21 @@ const EngineerProfile: React.FC = () => {
           />
           <FormInput
             label="Maximum Capacity"
-            value={formData.maxCapacity || 0}
-            onChange={(value) =>
-              handleChange("maxCapacity", parseInt(value) || 0)
-            }
-            type="number"
+            value={formData.maxCapacity?.toString() ?? ""}
+            onChange={(value) => handleChange("maxCapacity", value)}
+            type="text"
             readOnly={!isEditing}
             error={validationErrors.maxCapacity}
             icon={<Target className="w-4 h-4" />}
-            min={0}
-            max={100}
           />
           <FormInput
             label="Current Capacity"
-            value={formData.currentCapacity || 0}
-            onChange={(value) =>
-              handleChange("currentCapacity", parseInt(value) || 0)
-            }
-            type="number"
+            value={formData.currentCapacity?.toString() ?? ""}
+            onChange={(value) => handleChange("currentCapacity", value)}
+            type="text"
             readOnly={!isEditing}
             error={validationErrors.currentCapacity}
             icon={<TrendingUp className="w-4 h-4" />}
-            min={0}
-            max={formData.maxCapacity || 100}
           />
         </div>
 

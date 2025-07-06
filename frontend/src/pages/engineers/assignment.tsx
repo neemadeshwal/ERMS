@@ -11,11 +11,12 @@ import { useAuth } from "@/context/authContext";
 import { useEffect, useMemo, useState } from "react";
 import { getAllAssignments } from "@/actions/assignments/assignment-action";
 import { useNavigate } from "react-router-dom";
+import type { Assignment } from "@/types/types";
 
 const EngineerAssignment = () => {
   const { user, token } = useAuth();
   const navigate = useNavigate();
-  const [assignments, setAssignments] = useState<any[]>([]);
+  const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,14 +25,33 @@ const EngineerAssignment = () => {
       setLoading(true);
       try {
         const res = await getAllAssignments(token);
+        console.log("Raw API response:", res);
         const allAssignments = res.assignments || [];
+        console.log("All assignments:", allAssignments);
+
+        // Fix the filtering logic for engineerId array
         const engineerAssignments = allAssignments.filter(
-          (a: any) =>
-            a.engineerId === user._id ||
-            (Array.isArray(a.engineerId) && a.engineerId.includes(user._id))
+          (assignment: Assignment) => {
+            if (!assignment.engineerId) return false;
+
+            // Handle both populated and non-populated engineerId
+            if (Array.isArray(assignment.engineerId)) {
+              return assignment.engineerId.some((engineer) => {
+                if (typeof engineer === "object" && engineer !== null) {
+                  return engineer._id === user._id;
+                }
+                return engineer === user._id;
+              });
+            }
+
+            return assignment.engineerId === user._id;
+          }
         );
+
+        console.log("Filtered engineer assignments:", engineerAssignments);
         setAssignments(engineerAssignments);
       } catch (e) {
+        console.error("Error fetching assignments:", e);
         setAssignments([]);
       } finally {
         setLoading(false);
@@ -42,11 +62,67 @@ const EngineerAssignment = () => {
 
   const today = new Date();
 
+  // Helper function to get project name - works with both populated and non-populated projectId
+  const getProjectName = (assignment: any) => {
+    if (assignment.projectId?.name) return assignment.projectId.name;
+    if (assignment.projectId?.name) return assignment.projectId.name;
+    if (typeof assignment.projectId === "string")
+      return `Project ${assignment.projectId.description}`;
+    return "Unknown Project";
+  };
+
+  // Helper function to get project description
+  const getProjectDescription = (assignment: Assignment) => {
+    if (assignment.projectId?.description)
+      return assignment.projectId.description;
+    if (assignment.projectId?.description)
+      return assignment.projectId.description;
+    if (assignment.description) return assignment.description;
+    return "No description available";
+  };
+
+  // Helper function to get project progress
+  const getProjectProgress = (assignment: Assignment) => {
+    if (assignment.projectId?.progress !== undefined)
+      return assignment.projectId.progress;
+    if (assignment.projectId?.progress !== undefined)
+      return assignment.projectId.progress;
+    // Default progress based on status
+    if (assignment.status === "completed") return 100;
+    if (assignment.status === "active") return 50;
+    return 0;
+  };
+
+  // Helper function to get priority (default to medium since it's not in schema)
+  const getPriority = (assignment: Assignment) => {
+    if (assignment.priority) return assignment.priority;
+    // Infer priority from other fields if needed
+    const now = new Date();
+    const endDate = new Date(assignment.endDate);
+    const daysUntilEnd = Math.ceil(
+      (endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (daysUntilEnd < 7) return "high";
+    if (daysUntilEnd < 30) return "medium";
+    return "low";
+  };
+
+  // Helper function to format date
+  const formatDate = (dateString: any) => {
+    if (!dateString) return "N/A";
+    try {
+      return new Date(dateString).toLocaleDateString();
+    } catch {
+      return "Invalid Date";
+    }
+  };
+
   // Active assignments: status is "active" and startDate <= today
   const activeAssignments = useMemo(
     () =>
       assignments.filter(
-        (a) =>
+        (a: Assignment) =>
           a.status?.toLowerCase() === "active" && new Date(a.startDate) <= today
       ),
     [assignments, today]
@@ -57,11 +133,11 @@ const EngineerAssignment = () => {
     () =>
       assignments
         .filter(
-          (a) =>
+          (a: Assignment) =>
             new Date(a.startDate) > today &&
             (!a.status || a.status.toLowerCase() !== "completed")
         )
-        .map((a) => ({
+        .map((a: Assignment) => ({
           ...a,
           daysUntilStart: Math.ceil(
             (new Date(a.startDate).getTime() - today.getTime()) /
@@ -75,7 +151,7 @@ const EngineerAssignment = () => {
   const overdueAssignments = useMemo(
     () =>
       assignments.filter(
-        (a) =>
+        (a: Assignment) =>
           new Date(a.endDate) < today &&
           (!a.status || a.status.toLowerCase() !== "completed")
       ),
@@ -84,7 +160,7 @@ const EngineerAssignment = () => {
 
   // Total allocation for active assignments
   const totalAllocation = activeAssignments.reduce(
-    (sum, a) => sum + (a.allocationPercentage || 0),
+    (sum, a: Assignment) => sum + (Number(a.allocationPercentage) || 0),
     0
   );
 
@@ -100,10 +176,6 @@ const EngineerAssignment = () => {
             Manage your current and upcoming assignments
           </p>
         </div>
-        <button className="bg-[#515caa] hover:bg-[#454a94] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-[8px] font-medium transition-colors flex items-center gap-2 w-full sm:w-auto">
-          <Plus className="w-5 h-5" />
-          Request Assignment
-        </button>
       </div>
 
       {/* Summary Cards */}
@@ -116,7 +188,7 @@ const EngineerAssignment = () => {
                 {activeAssignments.length}
               </p>
             </div>
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100  rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center">
               <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
             </div>
           </div>
@@ -192,119 +264,126 @@ const EngineerAssignment = () => {
             </div>
           ) : (
             <div className="space-y-6 sm:space-y-8 flex flex-col gap-4 sm:gap-6">
-              {activeAssignments.map((assignment) => (
-                <div
-                  key={assignment._id || assignment.id}
-                  className="border border-gray-200 rounded-[15px] p-4 sm:p-6 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 gap-4">
-                    <div className="flex-1">
-                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
-                        <h4 className="text-base sm:text-lg font-semibold text-gray-900">
-                          {assignment.project?.name || "No Project"}
-                        </h4>
-                        <span
-                          className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium ${
-                            assignment.priority?.toLowerCase() === "high"
-                              ? "bg-red-100 text-red-700"
-                              : assignment.priority?.toLowerCase() === "medium"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-green-100 text-green-700"
-                          }`}
-                        >
-                          {assignment.priority
-                            ? assignment.priority.charAt(0).toUpperCase() +
-                              assignment.priority.slice(1)
-                            : "Medium"}{" "}
-                          Priority
-                        </span>
-                      </div>
-                      <p className="text-gray-600 mb-3 text-sm">
-                        {assignment.project?.description}
-                      </p>
+              {activeAssignments.map((assignment: Assignment) => {
+                const projectName = getProjectName(assignment);
+                const projectDescription = getProjectDescription(assignment);
+                const projectProgress = getProjectProgress(assignment);
+                const priority = getPriority(assignment);
 
-                      <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-gray-500">
-                        <div className="flex items-center gap-2">
-                          <User className="w-4 h-4" />
-                          <span>Role: {assignment.role}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4" />
-                          <span>
-                            {assignment.startDate} - {assignment.endDate}
+                return (
+                  <div
+                    key={assignment._id}
+                    className="border border-gray-200 rounded-[15px] p-4 sm:p-6 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 gap-4">
+                      <div className="flex-1">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                          <h4 className="text-base sm:text-lg font-semibold text-gray-900">
+                            {projectName}
+                          </h4>
+                          <span
+                            className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium ${
+                              priority.toLowerCase() === "high"
+                                ? "bg-red-100 text-red-700"
+                                : priority.toLowerCase() === "medium"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-green-100 text-green-700"
+                            }`}
+                          >
+                            {priority.charAt(0).toUpperCase() +
+                              priority.slice(1)}{" "}
+                            Priority
                           </span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4" />
-                          <span>
-                            Progress: {assignment.project?.progress ?? "—"}%
-                          </span>
+                        <p className="text-gray-600 mb-3 text-sm">
+                          {projectDescription}
+                        </p>
+
+                        <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-gray-500">
+                          <div className="flex items-center gap-2">
+                            <User className="w-4 h-4" />
+                            <span>Role: {assignment.role}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4" />
+                            <span>
+                              {formatDate(assignment.startDate)} -{" "}
+                              {formatDate(assignment.endDate)}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4" />
+                            <span>Progress: {projectProgress}%</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <div className="text-xs sm:text-sm text-gray-500 mb-1">
+                          Allocation
+                        </div>
+                        <div className="text-xl sm:text-2xl font-bold text-[#515caa]">
+                          {assignment.allocationPercentage || 0}%
                         </div>
                       </div>
                     </div>
 
-                    <div className="text-right">
-                      <div className="text-xs sm:text-sm text-gray-500 mb-1">
-                        Allocation
+                    {/* Progress Bar */}
+                    <div className="mb-4">
+                      <div className="flex justify-between text-xs sm:text-sm text-gray-600 mb-2">
+                        <span>Project Progress</span>
+                        <span>{projectProgress}%</span>
                       </div>
-                      <div className="text-xl sm:text-2xl font-bold text-[#515caa]">
-                        {assignment.allocationPercentage}%
+                      <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3">
+                        <div
+                          className="bg-gradient-to-r from-[#515caa] to-blue-500 h-2 sm:h-3 rounded-full transition-all duration-300"
+                          style={{
+                            width: `${Math.min(
+                              100,
+                              Math.max(0, Number(projectProgress))
+                            )}%`,
+                          }}
+                        ></div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Progress Bar */}
-                  <div className="mb-4">
-                    <div className="flex justify-between text-xs sm:text-sm text-gray-600 mb-2">
-                      <span>Project Progress</span>
-                      <span>{assignment.project?.progress ?? "—"}%</span>
+                    {/* Allocation Bar */}
+                    <div className="mb-4">
+                      <div className="flex justify-between text-xs sm:text-sm text-gray-600 mb-2">
+                        <span>Time Allocation</span>
+                        <span>{assignment.allocationPercentage || 0}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
+                        <div
+                          className="bg-gradient-to-r from-emerald-400 to-cyan-400 h-1.5 sm:h-2 rounded-full transition-all duration-300"
+                          style={{
+                            width: `${Math.min(
+                              100,
+                              Math.max(
+                                0,
+                                Number(assignment.allocationPercentage) || 0
+                              )
+                            )}%`,
+                          }}
+                        ></div>
+                      </div>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3">
-                      <div
-                        className="bg-gradient-to-r from-[#515caa] to-blue-500 h-2 sm:h-3 rounded-full transition-all duration-300"
-                        style={{
-                          width: `${Math.min(
-                            100,
-                            assignment.project?.progress ?? 0
-                          )}%`,
-                        }}
-                      ></div>
-                    </div>
-                  </div>
 
-                  {/* Allocation Bar */}
-                  <div className="mb-4">
-                    <div className="flex justify-between text-xs sm:text-sm text-gray-600 mb-2">
-                      <span>Time Allocation</span>
-                      <span>{assignment.allocationPercentage}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
-                      <div
-                        className="bg-gradient-to-r from-emerald-400 to-cyan-400 h-1.5 sm:h-2 rounded-full transition-all duration-300"
-                        style={{
-                          width: `${Math.min(
-                            100,
-                            assignment.allocationPercentage
-                          )}%`,
-                        }}
-                      ></div>
+                    {/* Action Buttons */}
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-4 border-t border-gray-100">
+                      <button className="bg-[#515caa] hover:bg-[#454a94] text-white px-3 sm:px-4 py-2 rounded-[5px] text-xs sm:text-sm font-medium transition-colors">
+                        View Details
+                      </button>
+                      <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 sm:px-4 py-2 rounded-[5px] text-xs sm:text-sm font-medium transition-colors">
+                        Update Progress
+                      </button>
+                      <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 sm:px-4 py-2 rounded-[5px] text-xs sm:text-sm font-medium transition-colors">
+                        Request Change
+                      </button>
                     </div>
                   </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-4 border-t border-gray-100">
-                    <button className="bg-[#515caa] hover:bg-[#454a94] text-white px-3 sm:px-4 py-2 rounded-[5px] text-xs sm:text-sm font-medium transition-colors">
-                      View Details
-                    </button>
-                    <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 sm:px-4 py-2 rounded-[5px] text-xs sm:text-sm font-medium transition-colors">
-                      Update Progress
-                    </button>
-                    <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 sm:px-4 py-2 rounded-[5px] text-xs sm:text-sm font-medium transition-colors">
-                      Request Change
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -328,49 +407,54 @@ const EngineerAssignment = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-              {upcomingAssignments.map((assignment) => (
-                <div
-                  key={assignment._id || assignment.id}
-                  className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-[15px] p-4 sm:p-6 border border-blue-100"
-                >
-                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 gap-2">
-                    <div className="flex-1">
-                      <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
-                        {assignment.project?.name || "No Project"}
-                      </h4>
-                      <p className="text-gray-600 mb-3 text-sm">
-                        {assignment.project?.description}
-                      </p>
+              {upcomingAssignments.map((assignment) => {
+                const projectName = getProjectName(assignment);
+                const projectDescription = getProjectDescription(assignment);
 
-                      <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-500">
-                        <div className="flex items-center gap-2">
-                          <User className="w-4 h-4" />
-                          <span>{assignment.role}</span>
+                return (
+                  <div
+                    key={assignment._id}
+                    className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-[15px] p-4 sm:p-6 border border-blue-100"
+                  >
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 gap-2">
+                      <div className="flex-1">
+                        <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
+                          {projectName}
+                        </h4>
+                        <p className="text-gray-600 mb-3 text-sm">
+                          {projectDescription}
+                        </p>
+
+                        <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-500">
+                          <div className="flex items-center gap-2">
+                            <User className="w-4 h-4" />
+                            <span>{assignment.role}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4" />
+                            <span>{assignment.allocationPercentage || 0}%</span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <TrendingUp className="w-4 h-4" />
-                          <span>{assignment.allocationPercentage}%</span>
+                      </div>
+
+                      <div className="text-center mt-2 md:mt-0">
+                        <div className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
+                          {assignment.daysUntilStart} days
                         </div>
                       </div>
                     </div>
 
-                    <div className="text-center mt-2 md:mt-0">
-                      <div className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
-                        {assignment.daysUntilStart} days
-                      </div>
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-4 border-t border-blue-200">
+                      <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-[5px] text-xs sm:text-sm font-medium transition-colors">
+                        View Details
+                      </button>
+                      <button className="bg-white hover:bg-gray-50 text-gray-700 px-3 sm:px-4 py-2 rounded-[5px] text-xs sm:text-sm font-medium transition-colors border border-gray-300">
+                        Set Reminder
+                      </button>
                     </div>
                   </div>
-
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-4 border-t border-blue-200">
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-[5px] text-xs sm:text-sm font-medium transition-colors">
-                      View Details
-                    </button>
-                    <button className="bg-white hover:bg-gray-50 text-gray-700 px-3 sm:px-4 py-2 rounded-[5px] text-xs sm:text-sm font-medium transition-colors border border-gray-300">
-                      Set Reminder
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

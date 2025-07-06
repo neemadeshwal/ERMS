@@ -7,7 +7,7 @@ export type UserRole = "engineer" | "manager";
 export type Seniority = "junior" | "mid" | "senior";
 
 // Project status
-export type ProjectStatus = "on-hold" | "active" | "completed";
+export type ProjectStatus = "on-hold" | "active" | "completed" | "planning";
 
 export type Priority = "high" | "low" | "medium";
 // Assignment status (frontend convenience)
@@ -30,6 +30,22 @@ export interface User {
   assignments: string[];
   seniority: string;
   status: string;
+  hoursPerWeek?: string;
+  efficiency?: string;
+}
+
+export interface EditUser {
+  email: string;
+  name: string;
+  role: UserRole;
+  department?: string;
+  color: string;
+  code: string;
+  skills?: string[];
+  currentCapacity: number;
+
+  seniority?: string;
+  status?: string;
   hoursPerWeek?: string;
   efficiency?: string;
 }
@@ -100,8 +116,12 @@ export interface NewAssignmentBody {
 // Assignment
 export interface Assignment {
   _id?: string;
-  engineerId: string[];
-  projectId: string;
+  engineerId: Engineer[];
+  description: string;
+  projectId: Project;
+  allocationPercentage: string;
+  projectProgress: string;
+  priority: string;
   projectName?: string; // For UI convenience
   allocation: number; // 0-100 (%)
   startDate: string; // ISO date string

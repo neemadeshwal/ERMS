@@ -51,6 +51,11 @@ const statusConfig = {
     bgColor: "bg-blue-50 border-blue-200",
     icon: Clock,
   },
+  planning: {
+    color: "bg-gradient-to-r from-blue-400 to-purple-500 text-white",
+    bgColor: "bg-blue-50 border-blue-200",
+    icon: Calendar, // or use another relevant icon, e.g., TrendingUp, Clock, or AlertCircle
+  },
 };
 
 const priorityConfig = {
