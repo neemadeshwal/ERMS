@@ -568,14 +568,12 @@ const ManagerDashboard = () => {
                     assignmentsToShow.length > 0 ? (
                       assignmentsToShow.map((assignment) => {
                         // Find engineer/project for display
-                        const engineer = getEngineers.find((e: User) =>
-                          Array.isArray(assignment.engineerId)
-                            ? assignment.engineerId.includes(e._id)
-                            : e._id === assignment.engineerId
+                        const engineer = getEngineers.find(
+                          (e: User) => assignment.engineerId[0]._id == e._id
                         );
 
                         const project = getProjects.find(
-                          (p) => p._id === assignment.projectId
+                          (p) => p._id === assignment.projectId._id
                         );
                         return (
                           <tr
