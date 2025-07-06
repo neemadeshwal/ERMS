@@ -13,7 +13,7 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
 );
-app.options("*", cors());
+app.options("/*any", cors());
 
 app.use(express.json());
 app.use("/api/auth", userRouter);
