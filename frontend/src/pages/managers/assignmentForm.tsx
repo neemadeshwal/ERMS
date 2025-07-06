@@ -32,10 +32,7 @@ import { toast } from "sonner";
 export const assignmentSchema = z.object({
   engineerId: z.string({ required_error: "Engineer is required" }),
   projectId: z.string({ required_error: "Project is required" }),
-  allocation: z
-    .number({ required_error: "Allocation is required" })
-    .min(1)
-    .max(100),
+  allocation: z.coerce.number(),
   role: z.enum([
     "developer",
     "senior-developer",
@@ -49,12 +46,11 @@ export const assignmentSchema = z.object({
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().min(1, "End date is required"),
   status: z.enum(["active", "completed", "on-hold"]),
-  priority: z.enum(["high", "medium", "low"]),
   description: z.string().min(5, "Description is required"),
 });
 
 type Engineer = { id: string; name: string };
-type Project = { id: string; name: string };
+type Project = { id: string; name: string; requiredSkills: string[] };
 
 export default function AssignmentForm({
   editId,
@@ -69,8 +65,26 @@ export default function AssignmentForm({
   const [loading, setLoading] = useState(false);
   const [engineers, setEngineers] = useState<Engineer[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [assignedEngineerId, setAssignedEngineerId] = useState<string | null>(
+    null
+  );
 
-  // Fetch engineers and projects from API
+  // React Hook Form setup
+  const form = useForm<z.infer<typeof assignmentSchema>>({
+    resolver: zodResolver(assignmentSchema),
+    defaultValues: {
+      engineerId: "",
+      projectId: "",
+      allocation: 0,
+      role: "developer",
+      startDate: "",
+      endDate: "",
+      status: "active",
+      description: "",
+    },
+  });
+
+  // Fetch engineers and projects, and filter engineers
   useEffect(() => {
     if (!token) return;
     (async () => {
@@ -79,39 +93,55 @@ export default function AssignmentForm({
           getAllEngineers(token),
           getAllProjects(token),
         ]);
-        // Ensure the id and name are used for value and display
-        setEngineers(
-          (engData.engineer || []).map((e: any) => ({
-            id: e.id || e._id,
-            name: e.name,
-          }))
-        );
         setProjects(
           (projData.projects || []).map((p: any) => ({
             id: p.id || p._id,
             name: p.name,
+            requiredSkills: p.requiredSkills,
           }))
+        );
+
+        // Get selected project and allocation
+        const selectedProjectId = form.watch("projectId");
+        const selectedAllocation = Number(form.watch("allocation")) || 0;
+        const selectedProject = (projData.projects || []).find(
+          (p: any) => (p.id || p._id) === selectedProjectId
+        );
+
+        setEngineers(
+          (engData.engineer || [])
+            // Filter by required skills if a project is selected
+            .filter((e: any) =>
+              selectedProject
+                ? selectedProject.requiredSkills?.some((skill: string) =>
+                    e.skills?.includes(skill)
+                  )
+                : true
+            )
+            // Filter by available capacity, but always include the assigned engineer
+            .filter((e: any) => {
+              const remaining = (e.maxCapacity || 0) - (e.currentCapacity || 0);
+              return (
+                remaining >= selectedAllocation ||
+                (assignedEngineerId && (e.id || e._id) === assignedEngineerId)
+              );
+            })
+            .map((e: any) => ({
+              id: e.id || e._id,
+              name: e.name,
+            }))
         );
       } catch (err) {
         toast.error("Failed to fetch engineers or projects.");
       }
     })();
-  }, [token]);
-
-  const form = useForm<z.infer<typeof assignmentSchema>>({
-    resolver: zodResolver(assignmentSchema),
-    defaultValues: {
-      engineerId: "",
-      projectId: "",
-      allocation: 100,
-      role: "developer",
-      startDate: "",
-      endDate: "",
-      status: "active",
-      priority: "medium",
-      description: "",
-    },
-  });
+    // Watch for allocation, projectId, and assignedEngineerId changes
+  }, [
+    token,
+    form.watch("projectId"),
+    form.watch("allocation"),
+    assignedEngineerId,
+  ]);
 
   // Fetch assignment details if editing
   useEffect(() => {
@@ -121,15 +151,25 @@ export default function AssignmentForm({
         try {
           const data = await getSingleAssignment(editId, token);
           if (data.assignment) {
+            // Extract assigned engineer ID (handle array or object)
+            let assignedId = "";
+            if (Array.isArray(data.assignment.engineerId)) {
+              assignedId = data.assignment.engineerId[0]?._id || "";
+            } else if (typeof data.assignment.engineerId === "object") {
+              assignedId = data.assignment.engineerId?._id || "";
+            } else if (typeof data.assignment.engineerId === "string") {
+              assignedId = data.assignment.engineerId;
+            }
+            setAssignedEngineerId(assignedId);
+
             form.reset({
-              engineerId: data.assignment.engineerId,
-              projectId: data.assignment.projectId,
+              engineerId: assignedId,
+              projectId: data.assignment.projectId?._id || "",
               allocation: data.assignment.allocationPercentage,
               role: data.assignment.role,
               startDate: data.assignment.startDate?.slice(0, 10) || "",
               endDate: data.assignment.endDate?.slice(0, 10) || "",
               status: data.assignment.status,
-              priority: data.assignment.priority,
               description: data.assignment.description,
             });
           }
@@ -185,37 +225,8 @@ export default function AssignmentForm({
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-10 mx-auto overflow-auto max-h-[70vh]"
       >
-        {/* Engineer & Project */}
+        {/* Engineer & Allocation */}
         <div className="flex flex-col md:flex-row justify-between gap-6">
-          <FormField
-            control={form.control}
-            name="engineerId"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Engineer</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={loading}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full py-5 rounded-[5px]">
-                      <SelectValue placeholder="Select engineer" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="w-full bg-white">
-                    {engineers.map((eng) => (
-                      <SelectItem key={eng.id} value={eng.id}>
-                        {eng.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <FormField
             control={form.control}
             name="projectId"
@@ -244,10 +255,6 @@ export default function AssignmentForm({
               </FormItem>
             )}
           />
-        </div>
-
-        {/* Allocation Percentage & Role */}
-        <div className="flex flex-col md:flex-row gap-6">
           <FormField
             control={form.control}
             name="allocation"
@@ -256,7 +263,6 @@ export default function AssignmentForm({
                 <FormLabel>Allocation (%)</FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
                     min={1}
                     max={100}
                     {...field}
@@ -266,6 +272,44 @@ export default function AssignmentForm({
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-6">
+          <FormField
+            control={form.control}
+            name="engineerId"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Engineer</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  disabled={loading}
+                >
+                  <FormControl>
+                    <SelectTrigger
+                      disabled={
+                        loading ||
+                        !form.watch("projectId") ||
+                        !form.watch("allocation")
+                      }
+                      className="w-full py-5 rounded-[5px]"
+                    >
+                      <SelectValue placeholder="Select engineer" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="w-full bg-white">
+                    {engineers.map((eng) => (
+                      <SelectItem key={eng.id} value={eng.id}>
+                        {eng.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -361,33 +405,6 @@ export default function AssignmentForm({
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
                     <SelectItem value="on-hold">On Hold</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="priority"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Priority</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={loading}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select priority" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="w-full bg-white">
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

@@ -192,7 +192,7 @@ export default function ProjectDetailPage() {
           <div className="space-y-2 flex-1 min-w-0">
             <button
               className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200 group mb-1"
-              onClick={() => navigate("/projects")}
+              onClick={() => navigate(-1)}
             >
               <ArrowLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform duration-200" />
               Back to Projects

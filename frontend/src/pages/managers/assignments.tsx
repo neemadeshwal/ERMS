@@ -349,17 +349,12 @@ const ComprehensiveAssignmentsManager = () => {
                       {/* Header */}
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 sm:mb-4 gap-2">
                         <div className="flex items-start gap-3 sm:gap-5">
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={(e) => {
-                              e.stopPropagation();
-                              handleSelectAssignment(assignment.id);
-                            }}
-                            className="w-4 h-4 text-[#515caa] rounded border-gray-300 focus:ring-[#515caa]"
-                          />
                           <div className="flex flex-col items-start gap-3">
-                            {assignment.description}
+                            <div className="font-[600]">
+                              {assignment.projectId.name}
+                            </div>
+                            <div>Task : {assignment.description}</div>
+
                             <div className="flex gap-2 items-center">
                               {assignment.engineerId[0].color &&
                               assignment.engineerId[0].code ? (

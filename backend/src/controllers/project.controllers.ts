@@ -30,7 +30,11 @@ export const createProject = asyncErrorHandler(
     if (errors.length) {
       return next(new ErrorHandler(errors.join(", "), 400));
     }
-    const project = await Project.create(req.body);
+    let progress = 0;
+    if (req.body.status === "completed") {
+      progress = 100;
+    }
+    const project = await Project.create({ ...req.body, progress });
     res.status(201).json({
       success: true,
       message: "Project created successfully",
@@ -86,9 +90,21 @@ export const updateProject = asyncErrorHandler(
     if (errors.length) {
       return next(new ErrorHandler(errors.join(", "), 400));
     }
-    const updated = await Project.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
+    const isProjectExist = await Project.findById(id);
+    if (!isProjectExist) {
+      return next(new ErrorHandler("Project not found", 404));
+    }
+    let progress = isProjectExist.progress;
+    if (req.body.status === "completed") {
+      progress = 100;
+    }
+    const updated = await Project.findByIdAndUpdate(
+      id,
+      { ...req.body, progress },
+      {
+        new: true,
+      }
+    );
     if (!updated) {
       return next(new ErrorHandler("Project not found", 404));
     }

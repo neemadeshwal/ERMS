@@ -21,8 +21,6 @@ function validateAssignment(body: any): string[] {
   if (!body.endDate) errors.push("End date is required");
   if (!["active", "completed", "on-hold"].includes(body.status))
     errors.push("Status must be active, completed, or on-hold");
-  if (!["high", "medium", "low"].includes(body.priority))
-    errors.push("Priority must be high, medium, or low");
   if (!body.description || body.description.length < 5)
     errors.push("Description is required and must be at least 5 characters");
   return errors;
@@ -136,6 +134,21 @@ export const updateAssignment = asyncErrorHandler(
       return next(new ErrorHandler("Assignment not found", 404));
     }
 
+    // Check if assignment is completed or endDate has passed
+    const isCompletedOrEnded =
+      req.body.status === "completed" ||
+      currentAssignment.status === "completed" ||
+      (!!currentAssignment.endDate && currentAssignment.endDate <= new Date());
+
+    if (isCompletedOrEnded) {
+      // Find the engineer and decrement their capacity
+      await User.findByIdAndUpdate(currentAssignment.engineerId[0], {
+        $inc: {
+          currentCapacity: -Number(currentAssignment.allocationPercentage),
+        },
+      });
+    }
+
     // Update the assignment
     const updated = await Assignment.findByIdAndUpdate(id, req.body, {
       new: true,
@@ -181,6 +194,18 @@ export const deleteAssignment = asyncErrorHandler(
       return next(new ErrorHandler("Unauthorized request", 401));
     }
     const { id } = req.params;
+    const currentAssignment = await Assignment.findById(id);
+    if (!currentAssignment) {
+      return next(new ErrorHandler("Assignment not found", 404));
+    }
+
+    // Find the engineer and decrement their capacity
+    await User.findByIdAndUpdate(currentAssignment.engineerId[0], {
+      $inc: {
+        currentCapacity: -Number(currentAssignment.allocationPercentage),
+      },
+    });
+
     const deleted = await Assignment.findByIdAndDelete(id);
     if (!deleted) {
       return next(new ErrorHandler("Assignment not found", 404));

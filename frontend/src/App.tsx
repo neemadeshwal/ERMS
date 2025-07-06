@@ -16,6 +16,7 @@ import { ProtectedRoute } from "./protectedRoute";
 import ProjectDetailPage from "./pages/managers/projectDetailPage";
 import AssignmentDetailPage from "./pages/managers/assignmentDetail";
 import EngineerProject from "./pages/engineers/project";
+import ErrorPage from "./pages/error/notFound";
 
 const router = createBrowserRouter([
   {
@@ -98,6 +99,10 @@ const router = createBrowserRouter([
         element: <AssignmentDetailPage />,
       },
     ],
+  },
+  {
+    path: "*",
+    element: <ErrorPage />,
   },
 ]);
 const App = () => {
