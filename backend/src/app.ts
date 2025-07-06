@@ -15,6 +15,10 @@ app.use(
 );
 app.options("/*any", cors());
 
+app.use("/", (req, res) => {
+  res.status(200).send("Server is upto date");
+});
+
 app.use(express.json());
 app.use("/api/auth", userRouter);
 app.use("/api/assignments", AssignmentRouter);
