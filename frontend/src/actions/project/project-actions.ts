@@ -14,7 +14,6 @@ export async function createProject(
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(projectData),
-    credentials: "include",
   });
   if (!response.ok) throw new Error("Failed to create project");
   return response.json();
@@ -28,7 +27,6 @@ export async function getAllProjects(token: string) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    credentials: "include",
   });
   if (!response.ok) throw new Error("Failed to fetch projects");
   return response.json();
@@ -40,7 +38,6 @@ export async function getSingleProject(id: string, token: string) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    credentials: "include",
   });
   if (!response.ok) throw new Error("Failed to fetch projects");
   const result = await response.json();
@@ -60,7 +57,6 @@ export async function updateProject(
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    credentials: "include",
     body: JSON.stringify(projectData),
   });
   if (!response.ok) throw new Error("Failed to update project");
@@ -76,7 +72,6 @@ export async function deleteProject(id: string, token: string) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    credentials: "include",
   });
   if (!response.ok) throw new Error("Failed to delete project");
   return response.json();

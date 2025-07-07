@@ -10,7 +10,6 @@ export async function CreateNewUser(userData: NewUserProps) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(userData),
-      credentials: "include",
     });
 
     const result = await response.json();
@@ -29,7 +28,6 @@ export async function LoginUser(loginData: loginDataProps) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(loginData),
-      credentials: "include",
     });
 
     const result = await response.json();
@@ -49,7 +47,6 @@ export async function getUser(token: string) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      credentials: "include",
     });
 
     if (!response.ok) {
