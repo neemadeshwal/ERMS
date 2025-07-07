@@ -21,6 +21,7 @@ export async function createAssignment(
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
+    credentials: "include",
     body: JSON.stringify(data),
   });
   if (!response.ok) throw new Error("Failed to create assignment");
@@ -35,6 +36,7 @@ export async function getAllAssignments(token: string) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
+    credentials: "include",
   });
   if (!response.ok) throw new Error("Failed to fetch assignments");
   return response.json();
@@ -48,6 +50,7 @@ export async function getSingleAssignment(id: string, token: string) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
+    credentials: "include",
   });
   if (!response.ok) throw new Error("Failed to fetch assignment");
   const result = await response.json();
@@ -67,6 +70,7 @@ export async function updateAssignment(
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
+    credentials: "include",
     body: JSON.stringify(assignmentData),
   });
   if (!response.ok) throw new Error("Failed to update assignment");
@@ -82,6 +86,7 @@ export async function deleteAssignment(id: string, token: string) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
+    credentials: "include",
   });
   if (!response.ok) throw new Error("Failed to delete assignment");
   return response.json();

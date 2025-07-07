@@ -15,8 +15,8 @@ app.use((0, cors_1.default)({
     origin: ["https://erms-virid.vercel.app", "http://localhost:5173"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
 }));
-app.options("/*any", (0, cors_1.default)());
 app.use("/", (req, res) => {
     res.status(200).send("Server is upto date");
 });

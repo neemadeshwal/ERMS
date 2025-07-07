@@ -8,6 +8,7 @@ export async function getAllEngineers(token: string) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
+    credentials: "include",
   });
   if (!response.ok) throw new Error("Failed to fetch engineers");
   const result = await response.json();
@@ -21,6 +22,7 @@ export async function updateProfile(UserData: EditUser, token: string) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
+    credentials: "include",
     body: JSON.stringify(UserData),
   });
   if (!response.ok) throw new Error("Failed to update profile detail");
