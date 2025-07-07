@@ -11,19 +11,26 @@ app.use(
     origin: ["https://erms-virid.vercel.app", "http://localhost:5173"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Accept",
+      "Origin",
+      "Cache-Control",
+      "X-File-Name",
+    ],
   })
 );
-
-app.use("/", (req, res) => {
-  res.status(200).send("Server is upto date");
-});
 
 app.use(express.json());
 app.use("/api/auth", userRouter);
 app.use("/api/assignments", AssignmentRouter);
 app.use("/api/projects", ProjectRouter);
 app.use("/api/engineers", EngineerRouter);
+app.use("/", (req, res) => {
+  res.status(200).send("Server is upto date");
+});
 app.use(errorMiddleware);
 
 export default app;
