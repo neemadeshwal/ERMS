@@ -64,7 +64,7 @@ const Login = () => {
     try {
       const loginUser = await LoginUser(values);
       if (!loginUser.success) {
-        toast.error(loginUser.message);
+        toast.error("An error occured .Please try again.");
       }
       if (loginUser.token) {
         login(loginUser.token, loginUser.role);
