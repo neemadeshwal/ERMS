@@ -37,6 +37,14 @@ const app = (0, express_1.default)();
 app.use(corsManual); // Manual CORS middleware (must be first)
 app.use(express_1.default.json()); // JSON body parser
 // ===== Routers =====
+app.get("/api/health", (req, res) => {
+    res.status(200).json({
+        status: "healthy",
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        message: "Server is running",
+    });
+});
 app.use("/api/auth", user_routes_1.default);
 app.use("/api/assignments", assignments_routes_1.default);
 app.use("/api/projects", projects_routes_1.default);

@@ -45,6 +45,15 @@ app.use(corsManual); // Manual CORS middleware (must be first)
 app.use(express.json()); // JSON body parser
 
 // ===== Routers =====
+
+app.get("/api/health", (req: Request, res: Response) => {
+  res.status(200).json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    message: "Server is running",
+  });
+});
 app.use("/api/auth", userRouter);
 app.use("/api/assignments", AssignmentRouter);
 app.use("/api/projects", ProjectRouter);
