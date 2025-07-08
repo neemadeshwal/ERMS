@@ -19,7 +19,8 @@ function init() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             yield (0, mongodb_1.connectDB)();
-            app_1.default.listen(constants_1.PORT, () => {
+            // Add '0.0.0.0' as the host parameter
+            app_1.default.listen(Number(constants_1.PORT), "0.0.0.0", () => {
                 console.log("Server is listening on Port:", constants_1.PORT, "......");
             });
         }
